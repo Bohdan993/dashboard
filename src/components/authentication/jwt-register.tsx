@@ -13,7 +13,8 @@ export const JWTRegister: FC = (props) => {
   const formik = useFormik({
     initialValues: {
       email: '',
-      name: '',
+      first_name: '',
+      last_name: '',
       password: '',
       policy: false,
       submit: null
@@ -24,13 +25,17 @@ export const JWTRegister: FC = (props) => {
         .email('Must be a valid email')
         .max(255)
         .required('Email is required'),
-      name: Yup
+      first_name: Yup
         .string()
         .max(255)
-        .required('Name is required'),
+        .required('First Name is required'),
+      last_name: Yup
+        .string()
+        .max(255)
+        .required('Last Name is required'),
       password: Yup
         .string()
-        .min(7)
+        .min(6)
         .max(255)
         .required('Password is required'),
       policy: Yup
@@ -39,7 +44,7 @@ export const JWTRegister: FC = (props) => {
     }),
     onSubmit: async (values, helpers): Promise<void> => {
       try {
-        await register(values.email, values.name, values.password);
+        await register(values.email, values.first_name, values.last_name, values.password);
 
         if (isMounted()) {
           const returnUrl = (router.query.returnUrl as string | undefined) || '/dashboard';
@@ -64,15 +69,26 @@ export const JWTRegister: FC = (props) => {
       {...props}
     >
       <TextField
-        error={Boolean(formik.touched.name && formik.errors.name)}
+        error={Boolean(formik.touched.first_name && formik.errors.first_name)}
         fullWidth
-        helperText={formik.touched.name && formik.errors.name}
-        label="Name"
+        helperText={formik.touched.first_name && formik.errors.first_name}
+        label="First Name"
         margin="normal"
-        name="name"
+        name="first_name"
         onBlur={formik.handleBlur}
         onChange={formik.handleChange}
-        value={formik.values.name}
+        value={formik.values.first_name}
+      />
+      <TextField
+        error={Boolean(formik.touched.last_name && formik.errors.last_name)}
+        fullWidth
+        helperText={formik.touched.last_name && formik.errors.last_name}
+        label="Last Name"
+        margin="normal"
+        name="last_name"
+        onBlur={formik.handleBlur}
+        onChange={formik.handleChange}
+        value={formik.values.last_name}
       />
       <TextField
         error={Boolean(formik.touched.email && formik.errors.email)}

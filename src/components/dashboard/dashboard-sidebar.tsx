@@ -10,6 +10,7 @@ import { Box, Button, Chip, Divider, Drawer, Typography, useMediaQuery } from '@
 import { Calendar as CalendarIcon } from '../../icons/calendar';
 import { Cash as CashIcon } from '../../icons/cash';
 import { ChartBar as ChartBarIcon } from '../../icons/chart-bar';
+import { Star as StarIcon } from '../../icons/star';
 import { ChartPie as ChartPieIcon } from '../../icons/chart-pie';
 import { ChatAlt2 as ChatAlt2Icon } from '../../icons/chat-alt2';
 import { ClipboardList as ClipboardListIcon } from '../../icons/clipboard-list';
@@ -57,42 +58,23 @@ const getSections = (t: TFunction): Section[] => [
     title: t('General'),
     items: [
       {
-        title: t('Overview'),
-        path: '/dashboard',
-        icon: <HomeIcon fontSize="small" />
+        title: t('Companies'),
+        path: '/dashboard/companies',
+        icon: <OfficeBuildingIcon fontSize="small" />
       },
       {
-        title: t('Analytics'),
-        path: '/dashboard/analytics',
-        icon: <ChartBarIcon fontSize="small" />
+        title: t('Projects'),
+        path: '/dashboard/projects',
+        icon: <StarIcon fontSize="small" />
       },
       {
-        title: t('Finance'),
-        path: '/dashboard/finance',
-        icon: <ChartPieIcon fontSize="small" />
+        title: t('Contacts'),
+        path: '/dashboard/contacts',
+        icon: <UsersIcon fontSize="small" />
       },
       {
-        title: t('Logistics'),
-        path: '/dashboard/logistics',
-        icon: <TruckIcon fontSize="small" />,
-        chip: <Chip
-          color="secondary"
-          label={(
-            <Typography
-              sx={{
-                fontSize: '10px',
-                fontWeight: '600'
-              }}
-            >
-              NEW
-            </Typography>
-          )}
-          size="small"
-        />
-      },
-      {
-        title: t('Account'),
-        path: '/dashboard/account',
+        title: t('Profile'),
+        path: '/dashboard/profile',
         icon: <UserCircleIcon fontSize="small" />
       }
     ]

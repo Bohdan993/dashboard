@@ -1,9 +1,9 @@
-import type { User } from '../types/user';
+// import type { User } from '../types/user';
 import { createResourceId } from '../utils/create-resource-id';
 import { decode, JWT_EXPIRES_IN, JWT_SECRET, sign } from '../utils/jwt';
 import { wait } from '../utils/wait';
 
-const users: User[] = [
+const users = [
   {
     id: '5e86809283e28b96d2d38537',
     avatar: '/static/mock-images/avatars/avatar-anika_visser.png',
@@ -37,7 +37,7 @@ type MeRequest = {
   accessToken: string
 };
 
-type MeResponse = Promise<User>;
+// type MeResponse = Promise<User>;
 
 class AuthApi {
   async login(request: LoginRequest): LoginResponse {
@@ -110,7 +110,7 @@ class AuthApi {
     });
   }
 
-  me(request: MeRequest): MeResponse {
+  me(request: MeRequest) {
     const { accessToken } = request;
 
     return new Promise((resolve, reject) => {
@@ -131,7 +131,7 @@ class AuthApi {
           avatar: user.avatar,
           email: user.email,
           name: user.name,
-          plan: user.plan
+          plan: user.plan,
         });
       } catch (err) {
         console.error('[Auth Api]: ', err);

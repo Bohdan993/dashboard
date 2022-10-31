@@ -16,17 +16,17 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import { customerApi } from '../../__fake-api__/customer-api';
-import { AuthGuard } from '../../components/authentication/auth-guard';
-import { DashboardLayout } from '../../components/dashboard/dashboard-layout';
-import { CustomerListTable } from '../../components/dashboard/customer/customer-list-table';
-import { useMounted } from '../../hooks/use-mounted';
-import { Download as DownloadIcon } from '../../icons/download';
-import { Plus as PlusIcon } from '../../icons/plus';
-import { Search as SearchIcon } from '../../icons/search';
-import { Upload as UploadIcon } from '../../icons/upload';
-import { gtm } from '../../lib/gtm';
-import type { Customer } from '../../types/customer';
+import { customerApi } from '../../../__fake-api__/customer-api';
+import { AuthGuard } from '../../../components/authentication/auth-guard';
+import { DashboardLayout } from '../../../components/dashboard/dashboard-layout';
+import { CustomerListTable } from '../../../components/dashboard/customer/customer-list-table';
+import { useMounted } from '../../../hooks/use-mounted';
+import { Download as DownloadIcon } from '../../../icons/download';
+import { Plus as PlusIcon } from '../../../icons/plus';
+import { Search as SearchIcon } from '../../../icons/search';
+import { Upload as UploadIcon } from '../../../icons/upload';
+import { gtm } from '../../../lib/gtm';
+import type { Customer } from '../../../types/customer';
 
 interface Filters {
   query?: string;
@@ -261,7 +261,7 @@ const CustomerList: NextPage = () => {
     <>
       <Head>
         <title>
-          Dashboard: Companies List | Material Kit Pro
+          Dashboard: Customer List | Material Kit Pro
         </title>
       </Head>
       <Box
@@ -280,12 +280,12 @@ const CustomerList: NextPage = () => {
             >
               <Grid item>
                 <Typography variant="h4">
-                  Companies
+                  Projects
                 </Typography>
               </Grid>
               <Grid item>
               <NextLink
-                  href="/dashboard/companies/new"
+                  href="/dashboard/projects/new"
                   passHref
                 >
                   <Button

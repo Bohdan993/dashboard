@@ -1,8 +1,9 @@
 import type { FC, ReactNode } from 'react';
 import { createContext, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { authApi } from '../__fake-api__/auth-api';
+import { authApi } from '../api/auth-api';
 import type { User } from '../types/user';
+import { StringMap } from 'i18next';
 
 interface State {
   isInitialized: boolean;
@@ -14,11 +15,19 @@ export interface AuthContextValue extends State {
   platform: 'JWT';
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (email: string, name: string, password: string) => Promise<void>;
+  loginMS: () => Promise<void>;
+  loginGoogle: (response: any) => Promise<void>;
+  register: (email: string, first_name: string, last_name: string, password: string) => Promise<void>;
 }
 
 interface AuthProviderProps {
   children: ReactNode;
+}
+
+type GoogleData = {
+  email: string;
+  first_name: string;
+  last_name: string;
 }
 
 enum ActionType {
@@ -112,6 +121,8 @@ export const AuthContext = createContext<AuthContextValue>({
   ...initialState,
   platform: 'JWT',
   login: () => Promise.resolve(),
+  loginMS: () => Promise.resolve(),
+  loginGoogle: () => Promise.resolve(),
   logout: () => Promise.resolve(),
   register: () => Promise.resolve()
 });
@@ -173,6 +184,42 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     });
   };
 
+  const loginMS = async (): Promise<void> => {
+    const { accessToken } = await authApi.loginMS();
+    const user = await authApi.me({ accessToken });
+
+    localStorage.setItem('accessToken', accessToken);
+
+    dispatch({
+      type: ActionType.LOGIN,
+      payload: {
+        user
+      }
+    });
+  };
+
+  const loginGoogle = async (response: any): Promise<void> => {
+
+    const idToken: string = response.tokenId;
+    const data: GoogleData = {
+      email: response.profileObj.email,
+      first_name: response.profileObj.givenName,
+      last_name: response.profileObj.familyName
+    };
+
+    const { accessToken } = await authApi.loginGoogle({idToken, data});
+    const user = await authApi.me({ accessToken });
+
+    localStorage.setItem('accessToken', accessToken);
+
+    dispatch({
+      type: ActionType.LOGIN,
+      payload: {
+        user
+      }
+    });
+  };
+
   const logout = async (): Promise<void> => {
     localStorage.removeItem('accessToken');
     dispatch({ type: ActionType.LOGOUT });
@@ -180,10 +227,11 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   const register = async (
     email: string,
-    name: string,
+    first_name: string,
+    last_name: string,
     password: string
   ): Promise<void> => {
-    const { accessToken } = await authApi.register({ email, name, password });
+    const { accessToken } = await authApi.register({ email, first_name, last_name, password });
     const user = await authApi.me({ accessToken });
 
     localStorage.setItem('accessToken', accessToken);
@@ -203,7 +251,9 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
         platform: 'JWT',
         login,
         logout,
-        register
+        register,
+        loginMS,
+        loginGoogle
       }}
     >
       {children}

@@ -294,8 +294,8 @@ export const DashboardNavbar: FC<DashboardNavbarProps> = (props) => {
           <Box sx={{ flexGrow: 1 }} />
           <LanguageButton />
           <ContentSearchButton />
-          <ContactsButton />
-          <NotificationsButton />
+          {/* <ContactsButton />
+          <NotificationsButton /> */}
           <AccountButton />
         </Toolbar>
       </DashboardNavbarRoot>

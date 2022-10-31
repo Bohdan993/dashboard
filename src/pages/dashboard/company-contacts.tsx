@@ -1,7 +1,6 @@
 import type { ChangeEvent, MouseEvent } from 'react';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import type { NextPage } from 'next';
-import NextLink from 'next/link';
 import Head from 'next/head';
 import {
   Box,
@@ -261,7 +260,7 @@ const CustomerList: NextPage = () => {
     <>
       <Head>
         <title>
-          Dashboard: Companies List | Material Kit Pro
+          Dashboard: Customer List | Material Kit Pro
         </title>
       </Head>
       <Box
@@ -280,22 +279,16 @@ const CustomerList: NextPage = () => {
             >
               <Grid item>
                 <Typography variant="h4">
-                  Companies
+                  Customers
                 </Typography>
               </Grid>
               <Grid item>
-              <NextLink
-                  href="/dashboard/companies/new"
-                  passHref
+                <Button
+                  startIcon={<PlusIcon fontSize="small" />}
+                  variant="contained"
                 >
-                  <Button
-                    component="a"
-                    startIcon={<PlusIcon fontSize="small" />}
-                    variant="contained"
-                  >
-                    Add
-                  </Button>
-                </NextLink>
+                  Add
+                </Button>
               </Grid>
             </Grid>
             <Box

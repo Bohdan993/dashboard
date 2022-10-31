@@ -12,8 +12,8 @@ export const JWTLogin: FC = (props) => {
   const { login } = useAuth();
   const formik = useFormik({
     initialValues: {
-      email: 'demo@devias.io',
-      password: 'Password123!',
+      email: '',
+      password: '',
       submit: null
     },
     validationSchema: Yup.object({
@@ -46,6 +46,7 @@ export const JWTLogin: FC = (props) => {
       }
     }
   });
+
 
   return (
     <form
@@ -95,19 +96,6 @@ export const JWTLogin: FC = (props) => {
         >
           Log In
         </Button>
-      </Box>
-      <Box sx={{ mt: 2 }}>
-        <Alert severity="info">
-          <div>
-            Use
-            {' '}
-            <b>demo@devias.io</b>
-            {' '}
-            and password
-            {' '}
-            <b>Password123!</b>
-          </div>
-        </Alert>
       </Box>
     </form>
   );
