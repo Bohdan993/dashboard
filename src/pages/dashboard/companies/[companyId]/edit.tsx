@@ -1,47 +1,47 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
+import { useMounted } from '../../../../hooks/use-mounted';
 import NextLink from 'next/link';
 import Head from 'next/head';
-import { Avatar, Box, Chip, Container, Link, Typography } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { customerApi } from '../../../../__fake-api__/customer-api';
+import { Box, Breadcrumbs, Container, Link, Typography } from '@mui/material';
 import { AuthGuard } from '../../../../components/authentication/auth-guard';
 import { DashboardLayout } from '../../../../components/dashboard/dashboard-layout';
-import { CustomerEditForm } from '../../../../components/dashboard/customer/customer-edit-form';
-import { useMounted } from '../../../../hooks/use-mounted';
+import { CompanyEditForm } from '../../../../components/dashboard/company/company-edit-form';
 import { gtm } from '../../../../lib/gtm';
-import type { Customer } from '../../../../types/customer';
-import { getInitials } from '../../../../utils/get-initials';
+import { companiesApi } from '../../../../api/companies-api';
+import type { Company } from '../../../../types/company';
 
-const CustomerEdit: NextPage = () => {
+const CompanyEdit: NextPage = () => {
+  const router = useRouter();
+  const {companyId} = router.query;
   const isMounted = useMounted();
-  const [customer, setCustomer] = useState<Customer | null>(null);
-
+  const [company, setCompany] = useState<Company | null>(null);
   useEffect(() => {
-    gtm.push({ event: 'page_view' });
+    // gtm.push({ event: 'page_view' });
   }, []);
 
-  const getCustomer = useCallback(async () => {
+  const getCompany = useCallback(async () => {
     try {
-      const data = await customerApi.getCustomer();
+      const data = await companiesApi.getCompany(Number(companyId));
 
       if (isMounted()) {
-        setCustomer(data);
+        setCompany(data);
       }
     } catch (err) {
       console.error(err);
     }
-  }, [isMounted]);
+  }, [isMounted, companyId]);
 
   useEffect(
     () => {
-      getCustomer();
+      getCompany();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  if (!customer) {
+  if (!company) {
     return null;
   }
 
@@ -49,95 +49,49 @@ const CustomerEdit: NextPage = () => {
     <>
       <Head>
         <title>
-          Dashboard: Customer Edit | Material Kit Pro
+          Dashboard: Company Edit | Material Kit Pro
         </title>
       </Head>
       <Box
         component="main"
         sx={{
-          backgroundColor: 'background.default',
           flexGrow: 1,
           py: 8
         }}
       >
         <Container maxWidth="md">
-          <Box sx={{ mb: 4 }}>
-            <NextLink
-              href="/dashboard/customers"
-              passHref
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h4">
+              Update company id {companyId}
+            </Typography>
+            <Breadcrumbs
+              separator="/"
+              sx={{ mt: 1 }}
             >
-              <Link
-                color="textPrimary"
-                component="a"
-                sx={{
-                  alignItems: 'center',
-                  display: 'flex'
-                }}
+              <NextLink
+                href="/dashboard"
+                passHref
               >
-                <ArrowBackIcon
-                  fontSize="small"
-                  sx={{ mr: 1 }}
-                />
-                <Typography variant="subtitle2">
-                  Customers
-                </Typography>
-              </Link>
-            </NextLink>
-          </Box>
-          <Box
-            sx={{
-              alignItems: 'center',
-              display: 'flex',
-              overflow: 'hidden'
-            }}
-          >
-            <Avatar
-              src={customer.avatar}
-              sx={{
-                height: 64,
-                mr: 2,
-                width: 64
-              }}
-            >
-              {getInitials(customer.name)}
-            </Avatar>
-            <div>
+                <Link variant="subtitle2">
+                  Dashboard
+                </Link>
+              </NextLink>
               <Typography
-                noWrap
-                variant="h4"
+                color="textSecondary"
+                variant="subtitle2"
               >
-                {customer.email}
+                Companies
               </Typography>
-              <Box
-                sx={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                <Typography variant="subtitle2">
-                  user_id:
-                </Typography>
-                <Chip
-                  label={customer.id}
-                  size="small"
-                  sx={{ ml: 1 }}
-                />
-              </Box>
-            </div>
+            </Breadcrumbs>
           </Box>
-          <Box mt={3}>
-            <CustomerEditForm customer={customer} />
-          </Box>
+          <CompanyEditForm id={Number(companyId)} company={company}/>
         </Container>
       </Box>
     </>
   );
 };
 
-CustomerEdit.getLayout = (page) => (
+CompanyEdit.getLayout = (page) => (
   <AuthGuard>
     <DashboardLayout>
       {page}
@@ -145,4 +99,4 @@ CustomerEdit.getLayout = (page) => (
   </AuthGuard>
 );
 
-export default CustomerEdit;
+export default CompanyEdit;

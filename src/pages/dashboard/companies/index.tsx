@@ -8,103 +8,97 @@ import {
   Button,
   Card,
   Container,
-  Divider,
   Grid,
   InputAdornment,
-  Tab,
-  Tabs,
   TextField,
   Typography
 } from '@mui/material';
-import { customerApi } from '../../../__fake-api__/customer-api';
+import { companiesApi } from '../../../api/companies-api';
 import { AuthGuard } from '../../../components/authentication/auth-guard';
 import { DashboardLayout } from '../../../components/dashboard/dashboard-layout';
-import { CustomerListTable } from '../../../components/dashboard/customer/customer-list-table';
+import { CompanyListTable } from '../../../components/dashboard/company/company-list-table';
 import { useMounted } from '../../../hooks/use-mounted';
-import { Download as DownloadIcon } from '../../../icons/download';
 import { Plus as PlusIcon } from '../../../icons/plus';
 import { Search as SearchIcon } from '../../../icons/search';
-import { Upload as UploadIcon } from '../../../icons/upload';
-import { gtm } from '../../../lib/gtm';
-import type { Customer } from '../../../types/customer';
+import type { Company } from '../../../types/company';
 
 interface Filters {
   query?: string;
-  hasAcceptedMarketing?: boolean;
-  isProspect?: boolean;
-  isReturning?: boolean;
+  // hasAcceptedMarketing?: boolean;
+  // isProspect?: boolean;
+  // isReturning?: boolean;
 }
 
-type SortField = 'updatedAt' | 'totalOrders';
+type SortField = 'company_name' | 'country';
 
 type SortDir = 'asc' | 'desc';
 
 type Sort =
-  | 'updatedAt|desc'
-  | 'updatedAt|asc'
-  | 'totalOrders|desc'
-  | 'totalOrders|asc';
+  | 'company_name|desc'
+  | 'company_name|asc'
+  | 'country|desc'
+  | 'country|asc';
 
 interface SortOption {
   label: string;
   value: Sort;
 }
 
-type TabValue = 'all' | 'hasAcceptedMarketing' | 'isProspect' | 'isReturning';
+// type TabValue = 'all' | 'hasAcceptedMarketing' | 'isProspect' | 'isReturning';
 
-interface Tab {
-  label: string;
-  value: TabValue;
-}
+// interface Tab {
+//   label: string;
+//   value: TabValue;
+// }
 
-const tabs: Tab[] = [
-  {
-    label: 'All',
-    value: 'all'
-  },
-  {
-    label: 'Accepts Marketing',
-    value: 'hasAcceptedMarketing'
-  },
-  {
-    label: 'Prospect',
-    value: 'isProspect'
-  },
-  {
-    label: 'Returning',
-    value: 'isReturning'
-  }
-];
+// const tabs: Tab[] = [
+//   {
+//     label: 'All',
+//     value: 'all'
+//   },
+//   {
+//     label: 'Accepts Marketing',
+//     value: 'hasAcceptedMarketing'
+//   },
+//   {
+//     label: 'Prospect',
+//     value: 'isProspect'
+//   },
+//   {
+//     label: 'Returning',
+//     value: 'isReturning'
+//   }
+// ];
 
 const sortOptions: SortOption[] = [
   {
-    label: 'Last update (newest)',
-    value: 'updatedAt|desc'
+    label: 'Company Name(A-Z)',
+    value: 'company_name|asc'
   },
   {
-    label: 'Last update (oldest)',
-    value: 'updatedAt|asc'
+    label: 'Company Name(Z-A)',
+    value: 'company_name|desc'
   },
   {
-    label: 'Total orders (highest)',
-    value: 'totalOrders|desc'
+    label: 'Country (A-Z)',
+    value: 'country|asc'
   },
   {
-    label: 'Total orders (lowest)',
-    value: 'totalOrders|asc'
-  }
+    label: 'Country (Z-A)',
+    value: 'country|desc'
+  },
 ];
 
 const applyFilters = (
-  customers: Customer[],
+  companies: Company[],
   filters: Filters
-): Customer[] => customers.filter((customer) => {
+): Company[] => companies.filter((company) => {
   if (filters.query) {
     let queryMatched = false;
-    const properties: ('email' | 'name')[] = ['email', 'name'];
+    const properties: ('country' | 'company_name')[] = ['country', 'company_name'];
 
     properties.forEach((property) => {
-      if ((customer[property]).toLowerCase().includes(filters.query!.toLowerCase())) {
+      if ((company[property]).toLowerCase().includes(filters.query!.toLowerCase())) {
         queryMatched = true;
       }
     });
@@ -114,22 +108,22 @@ const applyFilters = (
     }
   }
 
-  if (filters.hasAcceptedMarketing && !customer.hasAcceptedMarketing) {
-    return false;
-  }
+  // if (filters.hasAcceptedMarketing && !company.hasAcceptedMarketing) {
+  //   return false;
+  // }
 
-  if (filters.isProspect && !customer.isProspect) {
-    return false;
-  }
+  // if (filters.isProspect && !company.isProspect) {
+  //   return false;
+  // }
 
-  if (filters.isReturning && !customer.isReturning) {
-    return false;
-  }
+  // if (filters.isReturning && !company.isReturning) {
+  //   return false;
+  // }
 
   return true;
 });
 
-const descendingComparator = (a: Customer, b: Customer, sortBy: SortField): number => {
+const descendingComparator = (a: Company, b: Company, sortBy: SortField): number => {
   // When compared to something undefined, always returns false.
   // This means that if a field does not exist from either element ('a' or 'b') the return will be 0.
 
@@ -146,14 +140,14 @@ const descendingComparator = (a: Customer, b: Customer, sortBy: SortField): numb
 
 const getComparator = (sortDir: SortDir, sortBy: SortField) => (
   sortDir === 'desc'
-    ? (a: Customer, b: Customer) => descendingComparator(a, b, sortBy)
-    : (a: Customer, b: Customer) => -descendingComparator(a, b, sortBy)
+    ? (a: Company, b: Company) => descendingComparator(a, b, sortBy)
+    : (a: Company, b: Company) => -descendingComparator(a, b, sortBy)
 );
 
-const applySort = (customers: Customer[], sort: Sort): Customer[] => {
+const applySort = (companies: Company[], sort: Sort): Company[] => {
   const [sortBy, sortDir] = sort.split('|') as [SortField, SortDir];
   const comparator = getComparator(sortDir, sortBy);
-  const stabilizedThis = customers.map((el, index) => [el, index]);
+  const stabilizedThis = companies.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
     // @ts-ignore
@@ -172,36 +166,36 @@ const applySort = (customers: Customer[], sort: Sort): Customer[] => {
 };
 
 const applyPagination = (
-  customers: Customer[],
+  companies: Company[],
   page: number,
   rowsPerPage: number
-): Customer[] => customers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+): Company[] => companies.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
 const CustomerList: NextPage = () => {
   const isMounted = useMounted();
   const queryRef = useRef<HTMLInputElement | null>(null);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [currentTab, setCurrentTab] = useState<TabValue>('all');
+  const [companies, setCompanies] = useState<Company[]>([]);
+  // const [currentTab, setCurrentTab] = useState<TabValue>('all');
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [sort, setSort] = useState<Sort>(sortOptions[0].value);
   const [filters, setFilters] = useState<Filters>({
-    query: '',
-    hasAcceptedMarketing: undefined,
-    isProspect: undefined,
-    isReturning: undefined
+    query: ''
+    // hasAcceptedMarketing: undefined,
+    // isProspect: undefined,
+    // isReturning: undefined
   });
 
-  useEffect(() => {
-    gtm.push({ event: 'page_view' });
-  }, []);
+  // useEffect(() => {
+  //   gtm.push({ event: 'page_view' });
+  // }, []);
 
-  const getCustomers = useCallback(async () => {
+  const getCompanies = useCallback(async () => {
     try {
-      const data = await customerApi.getCustomers();
+      const data = await companiesApi.getCompanies();
 
       if (isMounted()) {
-        setCustomers(data);
+        setCompanies(data);
       }
     } catch (err) {
       console.error(err);
@@ -210,27 +204,27 @@ const CustomerList: NextPage = () => {
 
   useEffect(
     () => {
-      getCustomers();
+      getCompanies();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  const handleTabsChange = (event: ChangeEvent<{}>, value: TabValue): void => {
-    const updatedFilters: Filters = {
-      ...filters,
-      hasAcceptedMarketing: undefined,
-      isProspect: undefined,
-      isReturning: undefined
-    };
+  // const handleTabsChange = (event: ChangeEvent<{}>, value: TabValue): void => {
+  //   const updatedFilters: Filters = {
+  //     ...filters,
+  //     hasAcceptedMarketing: undefined,
+  //     isProspect: undefined,
+  //     isReturning: undefined
+  //   };
 
-    if (value !== 'all') {
-      updatedFilters[value] = true;
-    }
+  //   if (value !== 'all') {
+  //     updatedFilters[value] = true;
+  //   }
 
-    setFilters(updatedFilters);
-    setCurrentTab(value);
-  };
+  //   setFilters(updatedFilters);
+  //   setCurrentTab(value);
+  // };
 
   const handleQueryChange = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -253,9 +247,9 @@ const CustomerList: NextPage = () => {
   };
 
   // Usually query is done on backend with indexing solutions
-  const filteredCustomers = applyFilters(customers, filters);
-  const sortedCustomers = applySort(filteredCustomers, sort);
-  const paginatedCustomers = applyPagination(sortedCustomers, page, rowsPerPage);
+  const filteredCompanies = applyFilters(companies, filters);
+  const sortedCompanies = applySort(filteredCompanies, sort);
+  const paginatedCompanies = applyPagination(sortedCompanies, page, rowsPerPage);
 
   return (
     <>
@@ -298,45 +292,8 @@ const CustomerList: NextPage = () => {
                 </NextLink>
               </Grid>
             </Grid>
-            <Box
-              sx={{
-                m: -1,
-                mt: 3
-              }}
-            >
-              <Button
-                startIcon={<UploadIcon fontSize="small" />}
-                sx={{ m: 1 }}
-              >
-                Import
-              </Button>
-              <Button
-                startIcon={<DownloadIcon fontSize="small" />}
-                sx={{ m: 1 }}
-              >
-                Export
-              </Button>
-            </Box>
           </Box>
           <Card>
-            <Tabs
-              indicatorColor="primary"
-              onChange={handleTabsChange}
-              scrollButtons="auto"
-              sx={{ px: 3 }}
-              textColor="primary"
-              value={currentTab}
-              variant="scrollable"
-            >
-              {tabs.map((tab) => (
-                <Tab
-                  key={tab.value}
-                  label={tab.label}
-                  value={tab.value}
-                />
-              ))}
-            </Tabs>
-            <Divider />
             <Box
               sx={{
                 alignItems: 'center',
@@ -365,7 +322,7 @@ const CustomerList: NextPage = () => {
                       </InputAdornment>
                     )
                   }}
-                  placeholder="Search customers"
+                  placeholder="Search companies"
                 />
               </Box>
               <TextField
@@ -387,9 +344,9 @@ const CustomerList: NextPage = () => {
                 ))}
               </TextField>
             </Box>
-            <CustomerListTable
-              customers={paginatedCustomers}
-              customersCount={filteredCustomers.length}
+            <CompanyListTable
+              companies={paginatedCompanies}
+              companiesCount={sortedCompanies.length}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
               rowsPerPage={rowsPerPage}

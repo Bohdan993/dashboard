@@ -19,6 +19,7 @@ class CompaniesApi {
 
     async createCompany(request: CreateCompanyRequest) : GetCompanyResponse {
         const { company_name, address_1, address_2, city, state, country, zip } = request;
+        const accessToken = localStorage.getItem('accessToken');
 
         return new Promise(async (resolve, reject) => {
             try {
@@ -26,7 +27,8 @@ class CompaniesApi {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
-                    'accept': 'application/json'
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
                 },
                 body: JSON.stringify({
                     'company_name': company_name,
@@ -62,14 +64,16 @@ class CompaniesApi {
     }
 
     async getCompanies(request?: GetCompaniesRequest) : GetCompaniesResponse {
-
+        const accessToken = localStorage.getItem('accessToken');
+        
         return new Promise(async (resolve, reject) => {
             try {
                 const res = await fetch(`${baseUrl}/companies/list`, {
                 method: "GET",
                 headers: {
                     'Content-Type': 'application/json',
-                    'accept': 'application/json'
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
                 }
                 })
         
@@ -95,6 +99,7 @@ class CompaniesApi {
     }
 
     async getCompany(company_id: number) : GetCompanyResponse {
+        const accessToken = localStorage.getItem('accessToken');
 
         return new Promise(async (resolve, reject) => {
             try {
@@ -102,7 +107,8 @@ class CompaniesApi {
                 method: "GET",
                 headers: {
                     'Content-Type': 'application/json',
-                    'accept': 'application/json'
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
                 }
                 })
         
@@ -127,8 +133,49 @@ class CompaniesApi {
         });
     }
 
-    async updateCompany(company_id: number, request: CreateCompanyRequest){
+    async updateCompany(company_id: number, request: CreateCompanyRequest) : GetCompanyResponse {
+        const { company_name, address_1, address_2, city, state, country, zip } = request;
+        const accessToken = localStorage.getItem('accessToken');
 
+        return new Promise(async (resolve, reject) => {
+            try {
+                const res = await fetch(`${baseUrl}/companies/${company_id}`, {
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    'company_name': company_name,
+                    'address_1': address_1,
+                    'address_2': address_2,
+                    'city': city,
+                    'state': state,
+                    'country': country,
+                    'zip': zip
+                })
+                })
+        
+                if(!res.ok && res.status!==200)
+                {
+                    throw new Error(String(res.status));
+                }
+        
+                const company: Company = await res.json();
+        
+                if (!company) {
+                    reject(new Error('Виникла помилка при редагуванні компанії'));
+                    return;
+                }
+        
+                resolve(company);
+
+            } catch (err) {
+                console.error('[Auth Api]: ', err);
+                reject(new Error('Internal server error'));
+            }
+        });
     }
 
     async deleteCompany(company_id: number): Promise<void>{
