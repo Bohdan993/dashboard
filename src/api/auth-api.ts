@@ -1,21 +1,5 @@
 import type { User } from '../types/user';
-import { createResourceId } from '../utils/create-resource-id';
-import { decode, JWT_EXPIRES_IN, JWT_SECRET, sign } from '../utils/jwt';
-import { wait } from '../utils/wait';
 
-
-const users: User[] = [
-  {
-    id: 544,
-    avatar: '/static/mock-images/avatars/avatar-anika_visser.png',
-    email: 'demo@devias.io',
-    first_name: 'Anika Visser',
-    last_name: 'Anika Visser',
-    is_email_verif: false,
-    password: 'Password123!',
-    plan: 'Premium'
-  }
-];
 
 const baseUrl:string = "http://api.platops.cloud:8001";
 
@@ -136,7 +120,7 @@ class AuthApi {
           'Content-Type': 'application/json'
         };
 
-        const res = await fetch(`${baseUrl}/auth/5554`, {
+        const res = await fetch(`${baseUrl}/auth/login-google`, {
           method: "POST",
           headers,
           body: JSON.stringify(data)

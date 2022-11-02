@@ -2,10 +2,6 @@ import type { Company } from '../types/company';
 
 const baseUrl:string = "http://api.platops.cloud:8001";
 
-type RegisterResponse = Promise<{
-  accessToken: string;
-}>;
-
 type GetCompaniesResponse = Promise<Company[]>;
 
 type GetCompaniesRequest = {};
@@ -179,7 +175,38 @@ class CompaniesApi {
     }
 
     async deleteCompany(company_id: number): Promise<void>{
+        const accessToken = localStorage.getItem('accessToken');
 
+        return new Promise(async (resolve, reject) => {
+            try {
+                const res = await fetch(`${baseUrl}/companies/${company_id}`, {
+                method: "DELETE",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'accept': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                }
+                })
+        
+                if(!res.ok && res.status!==200)
+                {
+                    throw new Error(String(res.status));
+                }
+        
+                const json: {msg: number; detail: string} = await res.json();
+        
+                if (!json) {
+                    reject(new Error('Виникла помилка при видаленні компанії'));
+                    return;
+                }
+        
+                resolve();
+
+            } catch (err) {
+                console.error('[Auth Api]: ', err);
+                reject(new Error('Internal server error'));
+            }
+        });
 
     }
 

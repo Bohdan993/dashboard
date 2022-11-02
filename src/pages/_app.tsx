@@ -10,6 +10,7 @@ import nProgress from 'nprogress';
 import { CacheProvider } from '@emotion/react';
 import type { EmotionCache } from '@emotion/cache';
 import { ThemeProvider } from '@mui/material/styles';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import CssBaseline from '@mui/material/CssBaseline';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -47,6 +48,7 @@ const App: FC<EnhancedAppProps> = (props) => {
 
   return (
     <CacheProvider value={emotionCache}>
+      <GoogleOAuthProvider clientId="1030243889898-4e6dm149nqvst7ru154gmbfh05sc4c6f.apps.googleusercontent.com">
       <Head>
         <title>
           Material Kit Pro
@@ -56,38 +58,39 @@ const App: FC<EnhancedAppProps> = (props) => {
           content="initial-scale=1, width=device-width"
         />
       </Head>
-      <ReduxProvider store={store}>
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <AuthProvider>
-            <SettingsProvider>
-              <SettingsConsumer>
-                {({ settings }) => (
-                  <ThemeProvider
-                    theme={createTheme({
-                      direction: settings.direction,
-                      responsiveFontSizes: settings.responsiveFontSizes,
-                      mode: settings.theme
-                    })}
-                  >
-                    <RTL direction={settings.direction}>
-                      <CssBaseline />
-                      <Toaster position="top-center" />
-                      <SettingsButton />
-                      <AuthConsumer>
-                        {
-                          (auth) => !auth.isInitialized
-                            ? <SplashScreen />
-                            : getLayout(<Component {...pageProps} />)
-                        }
-                      </AuthConsumer>
-                    </RTL>
-                  </ThemeProvider>
-                )}
-              </SettingsConsumer>
-            </SettingsProvider>
-          </AuthProvider>
-        </LocalizationProvider>
-      </ReduxProvider>
+        <ReduxProvider store={store}>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <AuthProvider>
+              <SettingsProvider>
+                <SettingsConsumer>
+                  {({ settings }) => (
+                    <ThemeProvider
+                      theme={createTheme({
+                        direction: settings.direction,
+                        responsiveFontSizes: settings.responsiveFontSizes,
+                        mode: settings.theme
+                      })}
+                    >
+                      <RTL direction={settings.direction}>
+                        <CssBaseline />
+                        <Toaster position="top-center" />
+                        <SettingsButton />
+                        <AuthConsumer>
+                          {
+                            (auth) => !auth.isInitialized
+                              ? <SplashScreen />
+                              : getLayout(<Component {...pageProps} />)
+                          }
+                        </AuthConsumer>
+                      </RTL>
+                    </ThemeProvider>
+                  )}
+                </SettingsConsumer>
+              </SettingsProvider>
+            </AuthProvider>
+          </LocalizationProvider>
+        </ReduxProvider>
+      </GoogleOAuthProvider>
     </CacheProvider>
   );
 };

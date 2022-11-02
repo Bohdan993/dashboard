@@ -1,11 +1,11 @@
 export interface Project {
-    company_name: string;
-    address_1: string;
-    address_2: string;
-    city: string;
-    state: string;
-    country: string;
-    zip: string;
-    id?: number;
-  }
-  
+  name: string;
+  start_date: string;
+  end_date: string;
+  resp_person: string;
+  summary: string
+  id?: number;
+  company?: {
+      id: number;
+  };
+}

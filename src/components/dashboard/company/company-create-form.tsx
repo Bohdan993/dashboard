@@ -180,15 +180,6 @@ export const CompanyCreateForm: FC = (props) => {
         }}
       >
         <Button
-          color="error"
-          sx={{
-            m: 1,
-            mr: 'auto'
-          }}
-        >
-          Delete
-        </Button>
-        <Button
           sx={{ m: 1 }}
           variant="outlined"
         >

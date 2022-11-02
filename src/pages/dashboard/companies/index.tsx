@@ -251,6 +251,7 @@ const CustomerList: NextPage = () => {
   const sortedCompanies = applySort(filteredCompanies, sort);
   const paginatedCompanies = applyPagination(sortedCompanies, page, rowsPerPage);
 
+
   return (
     <>
       <Head>
