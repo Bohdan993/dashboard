@@ -13,7 +13,6 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import { companiesApi } from '../../../api/companies-api';
 import { AuthGuard } from '../../../components/authentication/auth-guard';
 import { DashboardLayout } from '../../../components/dashboard/dashboard-layout';
 import { CompanyListTable } from '../../../components/dashboard/company/company-list-table';
@@ -21,6 +20,8 @@ import { useMounted } from '../../../hooks/use-mounted';
 import { Plus as PlusIcon } from '../../../icons/plus';
 import { Search as SearchIcon } from '../../../icons/search';
 import type { Company } from '../../../types/company';
+import { useDispatch, useSelector } from '../../../store';
+import { getCompanies as getCompaniesFunc } from '../../../thunks/company';
 
 interface Filters {
   query?: string;
@@ -134,7 +135,6 @@ const descendingComparator = (a: Company, b: Company, sortBy: SortField): number
   if (b[sortBy]! > a[sortBy]!) {
     return 1;
   }
-
   return 0;
 };
 
@@ -171,10 +171,10 @@ const applyPagination = (
   rowsPerPage: number
 ): Company[] => companies.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
-const CustomerList: NextPage = () => {
+const CompaniesList: NextPage = () => {
   const isMounted = useMounted();
   const queryRef = useRef<HTMLInputElement | null>(null);
-  const [companies, setCompanies] = useState<Company[]>([]);
+  const { companies } = useSelector((state) => state.company);
   // const [currentTab, setCurrentTab] = useState<TabValue>('all');
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
@@ -185,6 +185,7 @@ const CustomerList: NextPage = () => {
     // isProspect: undefined,
     // isReturning: undefined
   });
+  const dispatch = useDispatch();
 
   // useEffect(() => {
   //   gtm.push({ event: 'page_view' });
@@ -192,10 +193,8 @@ const CustomerList: NextPage = () => {
 
   const getCompanies = useCallback(async () => {
     try {
-      const data = await companiesApi.getCompanies();
-
       if (isMounted()) {
-        setCompanies(data);
+        dispatch(getCompaniesFunc());
       }
     } catch (err) {
       console.error(err);
@@ -204,10 +203,15 @@ const CustomerList: NextPage = () => {
 
   useEffect(
     () => {
-      getCompanies();
+      let t: ReturnType<typeof setTimeout> = setTimeout(() => {
+        if(companies.length === 0) {
+          getCompanies();
+        }
+      }, 250)
+      return () => {clearTimeout(t); }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [companies]
   );
 
   // const handleTabsChange = (event: ChangeEvent<{}>, value: TabValue): void => {
@@ -360,7 +364,7 @@ const CustomerList: NextPage = () => {
   );
 };
 
-CustomerList.getLayout = (page) => (
+CompaniesList.getLayout = (page) => (
   <AuthGuard>
     <DashboardLayout>
       {page}
@@ -368,4 +372,4 @@ CustomerList.getLayout = (page) => (
   </AuthGuard>
 );
 
-export default CustomerList;
+export default CompaniesList;

@@ -5,19 +5,20 @@ import Head from 'next/head';
 import { Box, Breadcrumbs, Container, Link, Typography } from '@mui/material';
 import { AuthGuard } from '../../../components/authentication/auth-guard';
 import { DashboardLayout } from '../../../components/dashboard/dashboard-layout';
-import { ProductCreateForm } from '../../../components/dashboard/product/product-create-form';
+import { CompanyCreateForm } from '../../../components/dashboard/company/company-create-form';
 import { gtm } from '../../../lib/gtm';
 
-const ProductCreate: NextPage = () => {
+
+const CompanyCreate: NextPage = () => {
   useEffect(() => {
-    gtm.push({ event: 'page_view' });
+    // gtm.push({ event: 'page_view' });
   }, []);
 
   return (
     <>
       <Head>
         <title>
-          Dashboard: Contact Create | Material Kit Pro
+          Dashboard: Company Create | Material Kit Pro
         </title>
       </Head>
       <Box
@@ -30,7 +31,7 @@ const ProductCreate: NextPage = () => {
         <Container maxWidth="md">
           <Box sx={{ mb: 3 }}>
             <Typography variant="h4">
-              Create a new contact
+              Create a new company
             </Typography>
             <Breadcrumbs
               separator="/"
@@ -44,22 +45,30 @@ const ProductCreate: NextPage = () => {
                   Dashboard
                 </Link>
               </NextLink>
+              <NextLink
+                href="/dashboard/companies"
+                passHref
+              >
+                <Link variant="subtitle2">
+                  Companies
+                </Link>
+              </NextLink>
               <Typography
                 color="textSecondary"
                 variant="subtitle2"
               >
-                Contacts
+                New company
               </Typography>
             </Breadcrumbs>
           </Box>
-          <ProductCreateForm />
+          <CompanyCreateForm />
         </Container>
       </Box>
     </>
   );
 };
 
-ProductCreate.getLayout = (page) => (
+CompanyCreate.getLayout = (page) => (
   <AuthGuard>
     <DashboardLayout>
       {page}
@@ -67,4 +76,4 @@ ProductCreate.getLayout = (page) => (
   </AuthGuard>
 );
 
-export default ProductCreate;
+export default CompanyCreate;

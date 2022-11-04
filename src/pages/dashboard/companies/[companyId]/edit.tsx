@@ -76,11 +76,19 @@ const CompanyEdit: NextPage = () => {
                   Dashboard
                 </Link>
               </NextLink>
+              <NextLink
+                href="/dashboard/companies"
+                passHref
+              >
+                <Link variant="subtitle2">
+                  Companies
+                </Link>
+              </NextLink>
               <Typography
                 color="textSecondary"
                 variant="subtitle2"
               >
-                Companies
+                Edit company
               </Typography>
             </Breadcrumbs>
           </Box>

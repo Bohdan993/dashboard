@@ -8,6 +8,7 @@ import { DashboardLayout } from '../../../components/dashboard/dashboard-layout'
 import { CompanyCreateForm } from '../../../components/dashboard/company/company-create-form';
 import { gtm } from '../../../lib/gtm';
 
+
 const CompanyCreate: NextPage = () => {
   useEffect(() => {
     // gtm.push({ event: 'page_view' });
@@ -44,11 +45,19 @@ const CompanyCreate: NextPage = () => {
                   Dashboard
                 </Link>
               </NextLink>
+              <NextLink
+                href="/dashboard/companies"
+                passHref
+              >
+                <Link variant="subtitle2">
+                  Companies
+                </Link>
+              </NextLink>
               <Typography
                 color="textSecondary"
                 variant="subtitle2"
               >
-                Companies
+                New company
               </Typography>
             </Breadcrumbs>
           </Box>

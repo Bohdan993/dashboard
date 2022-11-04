@@ -33,7 +33,8 @@ import { XCircle as XCircleIcon } from '../../icons/x-circle';
 import { Logo } from '../logo';
 import { Scrollbar } from '../scrollbar';
 import { DashboardSidebarSection } from './dashboard-sidebar-section';
-import { OrganizationPopover } from './organization-popover';
+import { CompanyPopover } from '../../components/dashboard/company/company-popover';
+import { useSelector } from '../../store';
 
 interface DashboardSidebarProps {
   onClose?: () => void;
@@ -300,6 +301,7 @@ export const DashboardSidebar: FC<DashboardSidebarProps> = (props) => {
   const sections = useMemo(() => getSections(t), [t]);
   const organizationsRef = useRef<HTMLButtonElement | null>(null);
   const [openOrganizationsPopover, setOpenOrganizationsPopover] = useState<boolean>(false);
+  const { activeCompany } = useSelector((state) => state.company);
 
   const handlePathChange = () => {
     if (!router.isReady) {
@@ -378,15 +380,7 @@ export const DashboardSidebar: FC<DashboardSidebarProps> = (props) => {
                     color="inherit"
                     variant="subtitle1"
                   >
-                    Acme Inc
-                  </Typography>
-                  <Typography
-                    color="neutral.400"
-                    variant="body2"
-                  >
-                    {t('Your tier')}
-                    {' '}
-                    : Premium
+                    {activeCompany && activeCompany.company_name}
                   </Typography>
                 </div>
                 <SelectorIcon
@@ -455,7 +449,7 @@ export const DashboardSidebar: FC<DashboardSidebarProps> = (props) => {
           </Box>
         </Box>
       </Scrollbar>
-      <OrganizationPopover
+      <CompanyPopover
         anchorEl={organizationsRef.current}
         onClose={handleCloseOrganizationsPopover}
         open={openOrganizationsPopover}
