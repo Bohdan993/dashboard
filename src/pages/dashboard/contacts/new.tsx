@@ -5,20 +5,27 @@ import Head from 'next/head';
 import { Box, Breadcrumbs, Container, Link, Typography } from '@mui/material';
 import { AuthGuard } from '../../../components/authentication/auth-guard';
 import { DashboardLayout } from '../../../components/dashboard/dashboard-layout';
-import { CompanyCreateForm } from '../../../components/dashboard/company/company-create-form';
-import { gtm } from '../../../lib/gtm';
+import { ContactCreateForm } from '../../../components/dashboard/contact/contact-create-form';
+import { useSelector } from '../../../store';
 
 
-const CompanyCreate: NextPage = () => {
+const ContactCreate: NextPage = () => {
+
+  const { activeCompany } = useSelector((state) => state.company);
+
   useEffect(() => {
     // gtm.push({ event: 'page_view' });
   }, []);
+
+  if(!activeCompany) {
+    return null;
+  }
 
   return (
     <>
       <Head>
         <title>
-          Dashboard: Company Create | Material Kit Pro
+          Dashboard: Contact Create | Material Kit Pro
         </title>
       </Head>
       <Box
@@ -31,7 +38,7 @@ const CompanyCreate: NextPage = () => {
         <Container maxWidth="md">
           <Box sx={{ mb: 3 }}>
             <Typography variant="h4">
-              Create a new company
+              Create a new contact
             </Typography>
             <Breadcrumbs
               separator="/"
@@ -46,29 +53,31 @@ const CompanyCreate: NextPage = () => {
                 </Link>
               </NextLink>
               <NextLink
-                href="/dashboard/companies"
+                href="/dashboard/contacts"
                 passHref
               >
                 <Link variant="subtitle2">
-                  Companies
+                  Contacts
                 </Link>
               </NextLink>
               <Typography
                 color="textSecondary"
                 variant="subtitle2"
               >
-                New company
+                New contact
               </Typography>
             </Breadcrumbs>
           </Box>
-          <CompanyCreateForm />
+          <ContactCreateForm 
+            company_id={activeCompany && activeCompany.id!}
+          />
         </Container>
       </Box>
     </>
   );
 };
 
-CompanyCreate.getLayout = (page) => (
+ContactCreate.getLayout = (page) => (
   <AuthGuard>
     <DashboardLayout>
       {page}
@@ -76,4 +85,4 @@ CompanyCreate.getLayout = (page) => (
   </AuthGuard>
 );
 
-export default CompanyCreate;
+export default ContactCreate;

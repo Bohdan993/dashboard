@@ -115,7 +115,7 @@ export const AccountGeneralSettings: FC = (props) => {
           </Grid>
         </CardContent>
       </Card>
-      <Card sx={{ mt: 4 }}>
+      {/* <Card sx={{ mt: 4 }}>
         <CardContent>
           <Grid
             container
@@ -222,7 +222,7 @@ export const AccountGeneralSettings: FC = (props) => {
             </Grid>
           </Grid>
         </CardContent>
-      </Card>
+      </Card> */}
     </Box>
   );
 };

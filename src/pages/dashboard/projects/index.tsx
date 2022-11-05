@@ -25,69 +25,51 @@ import { getProjects as getProjectsFunc } from '../../../thunks/project';
 
 interface Filters {
   query?: string;
-  // hasAcceptedMarketing?: boolean;
-  // isProspect?: boolean;
-  // isReturning?: boolean;
 }
 
-type SortField = 'project_name' | 'country';
+type SortField = 'name' | 'start_date' | 'end_date';
 
 type SortDir = 'asc' | 'desc';
 
 type Sort =
-  | 'project_name|desc'
-  | 'project_name|asc'
-  | 'country|desc'
-  | 'country|asc';
+  | 'name|desc'
+  | 'name|asc'
+  | 'start_date|desc'
+  | 'start_date|asc'
+  | 'end_date|desc'
+  | 'end_date|asc';
 
 interface SortOption {
   label: string;
   value: Sort;
 }
 
-// type TabValue = 'all' | 'hasAcceptedMarketing' | 'isProspect' | 'isReturning';
-
-// interface Tab {
-//   label: string;
-//   value: TabValue;
-// }
-
-// const tabs: Tab[] = [
-//   {
-//     label: 'All',
-//     value: 'all'
-//   },
-//   {
-//     label: 'Accepts Marketing',
-//     value: 'hasAcceptedMarketing'
-//   },
-//   {
-//     label: 'Prospect',
-//     value: 'isProspect'
-//   },
-//   {
-//     label: 'Returning',
-//     value: 'isReturning'
-//   }
-// ];
 
 const sortOptions: SortOption[] = [
   {
     label: 'Project Name(A-Z)',
-    value: 'project_name|asc'
+    value: 'name|asc'
   },
   {
     label: 'Project Name(Z-A)',
-    value: 'project_name|desc'
+    value: 'name|desc'
   },
   {
-    label: 'Country (A-Z)',
-    value: 'country|asc'
+    label: 'Start Date (ASC)',
+    value: 'start_date|asc'
   },
   {
-    label: 'Country (Z-A)',
-    value: 'country|desc'
+    label: 'Start Date (DESC)',
+    value: 'start_date|desc'
   },
+  {
+    label: 'End Date (ASC)',
+    value: 'end_date|asc'
+  },
+  {
+    label: 'End Date (DESC)',
+    value: 'end_date|desc'
+  }
 ];
 
 const applyFilters = (
@@ -96,7 +78,7 @@ const applyFilters = (
 ): Project[] => projects.filter((project) => {
   if (filters.query) {
     let queryMatched = false;
-    const properties: ('country' | 'project_name')[] = ['country', 'project_name'];
+    const properties: ('name' | 'start_date' | 'end_date' )[] = ['name', 'start_date', 'end_date'];
 
     properties.forEach((property) => {
       if ((project[property]).toLowerCase().includes(filters.query!.toLowerCase())) {
@@ -108,18 +90,6 @@ const applyFilters = (
       return false;
     }
   }
-
-  // if (filters.hasAcceptedMarketing && !project.hasAcceptedMarketing) {
-  //   return false;
-  // }
-
-  // if (filters.isProspect && !project.isProspect) {
-  //   return false;
-  // }
-
-  // if (filters.isReturning && !project.isReturning) {
-  //   return false;
-  // }
 
   return true;
 });
@@ -175,60 +145,35 @@ const ProjectsList: NextPage = () => {
   const isMounted = useMounted();
   const queryRef = useRef<HTMLInputElement | null>(null);
   const { projects } = useSelector((state) => state.project);
-  // const [currentTab, setCurrentTab] = useState<TabValue>('all');
+  const { activeCompany } = useSelector((state) => state.company);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [sort, setSort] = useState<Sort>(sortOptions[0].value);
   const [filters, setFilters] = useState<Filters>({
     query: ''
-    // hasAcceptedMarketing: undefined,
-    // isProspect: undefined,
-    // isReturning: undefined
   });
   const dispatch = useDispatch();
-
-  // useEffect(() => {
-  //   gtm.push({ event: 'page_view' });
-  // }, []);
 
   const getProjects = useCallback(async () => {
     try {
       if (isMounted()) {
-        dispatch(getProjectsFunc());
+        dispatch(getProjectsFunc({company_id: activeCompany?.id!}));
       }
     } catch (err) {
       console.error(err);
     }
-  }, [isMounted]);
+  }, [isMounted, activeCompany]);
 
   useEffect(
     () => {
-      let t: ReturnType<typeof setTimeout> = setTimeout(() => {
-        if(projects.length === 0) {
-          getProjects();
-        }
-      }, 250)
-      return () => {clearTimeout(t); }
+      if(activeCompany && activeCompany.id) {
+        getProjects();
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [projects]
+    [activeCompany]
   );
 
-  // const handleTabsChange = (event: ChangeEvent<{}>, value: TabValue): void => {
-  //   const updatedFilters: Filters = {
-  //     ...filters,
-  //     hasAcceptedMarketing: undefined,
-  //     isProspect: undefined,
-  //     isReturning: undefined
-  //   };
-
-  //   if (value !== 'all') {
-  //     updatedFilters[value] = true;
-  //   }
-
-  //   setFilters(updatedFilters);
-  //   setCurrentTab(value);
-  // };
 
   const handleQueryChange = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -255,6 +200,9 @@ const ProjectsList: NextPage = () => {
   const sortedProjects = applySort(filteredProjects, sort);
   const paginatedProjects = applyPagination(sortedProjects, page, rowsPerPage);
 
+  if(!activeCompany) {
+    return null;
+  }
 
   return (
     <>
@@ -356,6 +304,7 @@ const ProjectsList: NextPage = () => {
               onRowsPerPageChange={handleRowsPerPageChange}
               rowsPerPage={rowsPerPage}
               page={page}
+              company_id={activeCompany && activeCompany.id!}
             />
           </Card>
         </Container>

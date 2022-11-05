@@ -1,122 +1,115 @@
-import type { FC } from 'react';
-import { ChangeEvent, Fragment, MouseEvent, useState } from 'react';
-import numeral from 'numeral';
+import type { ChangeEvent, FC, MouseEvent } from 'react';
+import { useEffect, useState } from 'react';
+import NextLink from 'next/link';
 import PropTypes from 'prop-types';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import {
   Box,
-  Button,
-  CardContent,
-  Divider,
-  Grid,
   IconButton,
-  InputAdornment,
-  LinearProgress,
-  MenuItem,
-  Switch,
+  Link,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TablePagination,
   TableRow,
-  TextField,
-  Typography
 } from '@mui/material';
-import { ChevronDown as ChevronDownIcon } from '../../../icons/chevron-down';
-import { ChevronRight as ChevronRightIcon } from '../../../icons/chevron-right';
-import { DotsHorizontal as DotsHorizontalIcon } from '../../../icons/dots-horizontal';
-import { Image as ImageIcon } from '../../../icons/image';
-import type { Product } from '../../../types/product';
+import { PencilAlt as PencilAltIcon } from '../../../icons/pencil-alt';
+import { Trash as TrashIcon } from '../../../icons/trash';
+import type { Contact } from '../../../types/contact';
 import { Scrollbar } from '../../scrollbar';
-import { SeverityPill } from '../../severity-pill';
+import { DeleteConfirmationDialog } from '../../../components/dashboard/delete-confirmation-dialog'
+import { useDispatch } from '../../../store';
+import { deleteContact } from '../../../thunks/contact';
 
-interface ProductListTableProps {
+interface ContactListTableProps {
+  contacts: Contact[];
+  contactsCount: number;
   onPageChange: (event: MouseEvent<HTMLButtonElement> | null, newPage: number) => void;
   onRowsPerPageChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   page: number;
-  products: Product[];
-  productsCount: number;
   rowsPerPage: number;
+  company_id: number;
 }
 
-const categoryOptions = [
-  {
-    label: 'Healthcare',
-    value: 'healthcare'
-  },
-  {
-    label: 'Makeup',
-    value: 'makeup'
-  },
-  {
-    label: 'Dress',
-    value: 'dress'
-  },
-  {
-    label: 'Skincare',
-    value: 'skincare'
-  },
-  {
-    label: 'Jewelry',
-    value: 'jewelry'
-  },
-  {
-    label: 'Blouse',
-    value: 'blouse'
-  }
-];
-
-export const ProductListTable: FC<ProductListTableProps> = (props) => {
+export const ContactListTable: FC<ContactListTableProps> = (props) => {
   const {
+    contacts,
+    contactsCount,
     onPageChange,
     onRowsPerPageChange,
     page,
-    products,
-    productsCount,
     rowsPerPage,
+    company_id,
     ...other
   } = props;
-  const [openProduct, setOpenProduct] = useState<string | null>(null);
+  const dispatch = useDispatch();
+  const [show, setShow] = useState<boolean>(false);
+  const [contactId, setContactId] = useState<number>(0);
 
-  const handleOpenProduct = (productId: string): void => {
-    setOpenProduct((prevValue) => (prevValue === productId ? null : productId));
-  };
+  useEffect(() => {
+    setShow(false);
+  } , [company_id]);
 
-  const handleUpdateProduct = (): void => {
-    setOpenProduct(null);
-    toast.success('Product updated');
-  };
 
-  const handleCancelEdit = (): void => {
-    setOpenProduct(null);
-  };
+  const handleDelete = (
+    event: MouseEvent<HTMLButtonElement>,
+    contactId: number): void => {
+      setContactId(contactId);
+      setShow(true);
+  }
 
-  const handleDeleteProduct = (): void => {
-    toast.error('Product cannot be deleted');
-  };
+  const handleConfirm = async (event: MouseEvent<HTMLButtonElement>, contactId: number): Promise<void>  => {
+    try {
+      await dispatch(deleteContact({
+        "contactId": contactId,
+        "company_id": company_id!
+      }));
+      toast.success('Contact deleted!');
+    } catch(err) {
+      console.error(err);
+      toast.error('Something went wrong!');
+    }
+  }
+
+  const handleCancel = (event: MouseEvent<HTMLButtonElement>): void  => {
+  }
 
   return (
     <div {...other}>
       <Scrollbar>
-        <Table sx={{ minWidth: 1200 }}>
-          <TableHead>
+        <Table sx={{ minWidth: 700 }}>
+          <TableHead sx={{ visibility: 'visible' }}>
             <TableRow>
-              <TableCell />
-              <TableCell width="25%">
+              <TableCell>
+                Type
+              </TableCell>
+              <TableCell>
                 Name
               </TableCell>
-              <TableCell width="25%">
-                Stock
+              <TableCell>
+                Email
               </TableCell>
               <TableCell>
-                Price
+                Phone
               </TableCell>
               <TableCell>
-                sku
+                Address 1
               </TableCell>
               <TableCell>
-                Status
+                Address 2
+              </TableCell>
+              <TableCell>
+                City
+              </TableCell>
+              <TableCell>
+                State
+              </TableCell>
+              <TableCell>
+                Country
+              </TableCell>
+              <TableCell>
+                Zip
               </TableCell>
               <TableCell align="right">
                 Actions
@@ -124,345 +117,77 @@ export const ProductListTable: FC<ProductListTableProps> = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {products.map((product) => {
-              const open = product.id === openProduct;
+            {contacts.map((contact) => {
 
               return (
-                <Fragment key={product.id}>
-                  <TableRow
-                    hover
-                    key={product.id}
-                  >
-                    <TableCell
-                      padding="checkbox"
+                <TableRow
+                  hover
+                  key={contact.id}
+                >
+                  <TableCell>
+                    {`${contact.type}`}
+                  </TableCell>
+                  <TableCell>
+                    <Box
                       sx={{
-                        ...(open && {
-                          position: 'relative',
-                          '&:after': {
-                            position: 'absolute',
-                            content: '" "',
-                            top: 0,
-                            left: 0,
-                            backgroundColor: 'primary.main',
-                            width: 3,
-                            height: 'calc(100% + 1px)'
-                          }
-                        })
+                        alignItems: 'center',
+                        display: 'flex'
                       }}
-                      width="25%"
                     >
-                      <IconButton onClick={() => handleOpenProduct(product.id)}>
-                        {
-                          open
-                            ? <ChevronDownIcon fontSize="small" />
-                            : <ChevronRightIcon fontSize="small" />
-                        }
-                      </IconButton>
-                    </TableCell>
-                    <TableCell width="25%">
-                      <Box
-                        sx={{
-                          alignItems: 'center',
-                          display: 'flex'
-                        }}
-                      >
-                        {
-                          product.image
-                            ? (
-                              <Box
-                                sx={{
-                                  alignItems: 'center',
-                                  backgroundColor: 'background.default',
-                                  backgroundImage: `url(${product.image})`,
-                                  backgroundPosition: 'center',
-                                  backgroundSize: 'cover',
-                                  borderRadius: 1,
-                                  display: 'flex',
-                                  height: 80,
-                                  justifyContent: 'center',
-                                  overflow: 'hidden',
-                                  width: 80
-                                }}
-                              />
-                            )
-                            : (
-                              <Box
-                                sx={{
-                                  alignItems: 'center',
-                                  backgroundColor: 'background.default',
-                                  borderRadius: 1,
-                                  display: 'flex',
-                                  height: 80,
-                                  justifyContent: 'center',
-                                  width: 80
-                                }}
-                              >
-                                <ImageIcon fontSize="small" />
-                              </Box>
-                            )
-                        }
-                        <Box
-                          sx={{
-                            cursor: 'pointer',
-                            ml: 2
-                          }}
+                        <NextLink
+                          href={`/dashboard/contacts/${contact.id}`}
+                          passHref
                         >
-                          <Typography variant="subtitle2">
-                            {product.name}
-                          </Typography>
-                          <Typography
-                            color="textSecondary"
-                            variant="body2"
+                          <Link
+                            color="inherit"
+                            variant="subtitle2"
                           >
-                            in {product.category}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell width="25%">
-                      <LinearProgress
-                        value={product.quantity}
-                        variant="determinate"
-                        color={product.quantity >= 10 ? 'success' : 'error'}
-                        sx={{
-                          height: 8,
-                          width: 36
-                        }}
-                      />
-                      <Typography
-                        color="textSecondary"
-                        variant="body2"
-                      >
-                        {product.quantity}
-                        {' '}
-                        in stock
-                        {product.variants > 1 && ` in ${product.variants} variants`}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      {numeral(product.price).format(`${product.currency}0,0.00`)}
-                    </TableCell>
-                    <TableCell>
-                      {product.sku}
-                    </TableCell>
-                    <TableCell>
-                      <SeverityPill color={product.status === 'published' ? 'success' : 'info'}>
-                        {product.status}
-                      </SeverityPill>
-                    </TableCell>
-                    <TableCell align="right">
-                      <IconButton>
-                        <DotsHorizontalIcon fontSize="small" />
+                            {contact.name}
+                          </Link>
+                        </NextLink>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    {`${contact.email}`}
+                  </TableCell>
+                  <TableCell>
+                    {`${contact.phone_num}`}
+                  </TableCell>
+                  <TableCell>
+                     {`${contact.address_1}`}
+                  </TableCell>
+                  <TableCell>
+                     {`${contact.address_2}`}
+                  </TableCell>
+                  <TableCell>
+                     {`${contact.city}`}
+                  </TableCell>
+                  <TableCell>
+                     {`${contact.state}`}
+                  </TableCell>
+                  <TableCell>
+                     {`${contact.country}`}
+                  </TableCell>
+                  <TableCell>
+                     {`${contact.zip}`}
+                  </TableCell>
+                  <TableCell align="right">
+                    <NextLink
+                      href={`/dashboard/contacts/${contact.id}/edit`}
+                      passHref
+                    >
+                      <IconButton component="a">
+                        <PencilAltIcon fontSize="small" />
                       </IconButton>
-                    </TableCell>
-                  </TableRow>
-                  {open && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={7}
-                        sx={{
-                          p: 0,
-                          position: 'relative',
-                          '&:after': {
-                            position: 'absolute',
-                            content: '" "',
-                            top: 0,
-                            left: 0,
-                            backgroundColor: 'primary.main',
-                            width: 3,
-                            height: 'calc(100% + 1px)'
-                          }
-                        }}
-                      >
-                        <CardContent>
-                          <Grid
-                            container
-                            spacing={3}
-                          >
-                            <Grid
-                              item
-                              md={6}
-                              xs={12}
-                            >
-                              <Typography variant="h6">
-                                Basic details
-                              </Typography>
-                              <Divider sx={{ my: 2 }} />
-                              <Grid
-                                container
-                                spacing={3}
-                              >
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                >
-                                  <TextField
-                                    defaultValue={product.name}
-                                    fullWidth
-                                    label="Product name"
-                                    name="name"
-                                  />
-                                </Grid>
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                >
-                                  <TextField
-                                    defaultValue={product.sku}
-                                    disabled
-                                    fullWidth
-                                    label="SKU"
-                                    name="sku"
-                                  />
-                                </Grid>
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                >
-                                  <TextField
-                                    defaultValue={product.category}
-                                    fullWidth
-                                    label="Category"
-                                    select
-                                  >
-                                    {categoryOptions.map((option) => (
-                                      <MenuItem
-                                        key={option.value}
-                                        value={option.value}
-                                      >
-                                        {option.label}
-                                      </MenuItem>
-                                    ))}
-                                  </TextField>
-                                </Grid>
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                >
-                                  <TextField
-                                    defaultValue={product.id}
-                                    disabled
-                                    fullWidth
-                                    label="Barcode"
-                                    name="barcode"
-                                  />
-                                </Grid>
-                              </Grid>
-                            </Grid>
-                            <Grid
-                              item
-                              md={6}
-                              xs={12}
-                            >
-                              <Typography variant="h6">
-                                Pricing and stocks
-                              </Typography>
-                              <Divider sx={{ my: 2 }} />
-                              <Grid
-                                container
-                                spacing={3}
-                              >
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                >
-                                  <TextField
-                                    defaultValue={product.price}
-                                    fullWidth
-                                    label="Old price"
-                                    name="old-price"
-                                    InputProps={{
-                                      startAdornment: (
-                                        <InputAdornment position="start">
-                                          {product.currency}
-                                        </InputAdornment>
-                                      )
-                                    }}
-                                    type="number"
-                                  />
-                                </Grid>
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                >
-                                  <TextField
-                                    defaultValue={product.price}
-                                    fullWidth
-                                    label="New price"
-                                    name="new-price"
-                                    InputProps={{
-                                      startAdornment: (
-                                        <InputAdornment position="start">
-                                          $
-                                        </InputAdornment>
-                                      )
-                                    }}
-                                    type="number"
-                                  />
-                                </Grid>
-                                <Grid
-                                  item
-                                  md={6}
-                                  xs={12}
-                                  sx={{
-                                    alignItems: 'center',
-                                    display: 'flex'
-                                  }}
-                                >
-                                  <Switch />
-                                  <Typography variant="subtitle2">
-                                    Keep selling when stock is empty
-                                  </Typography>
-                                </Grid>
-                              </Grid>
-                            </Grid>
-                          </Grid>
-                        </CardContent>
-                        <Divider />
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            px: 2,
-                            py: 1
-                          }}
-                        >
-                          <Button
-                            onClick={handleUpdateProduct}
-                            sx={{ m: 1 }}
-                            type="submit"
-                            variant="contained"
-                          >
-                            Update
-                          </Button>
-                          <Button
-                            onClick={handleCancelEdit}
-                            sx={{ m: 1 }}
-                            variant="outlined"
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={handleDeleteProduct}
-                            color="error"
-                            sx={{
-                              m: 1,
-                              ml: 'auto'
-                            }}
-                          >
-                            Delete product
-                          </Button>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </Fragment>
+                    </NextLink>
+                    <IconButton component="button" onClick={(event) => handleDelete(
+                        event,
+                        contact.id as number
+                      )}>
+                      <TrashIcon fontSize="small" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
               );
             })}
           </TableBody>
@@ -470,22 +195,31 @@ export const ProductListTable: FC<ProductListTableProps> = (props) => {
       </Scrollbar>
       <TablePagination
         component="div"
-        count={productsCount}
+        count={contactsCount}
         onPageChange={onPageChange}
         onRowsPerPageChange={onRowsPerPageChange}
         page={page}
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
       />
+      <DeleteConfirmationDialog
+        id={contactId}
+        subject={'contact'}
+        onConfirmHandler={(event) => handleConfirm(event, contactId)}
+        onCancelHandler={handleCancel}
+        show={show}
+        setShow={setShow}
+      />
     </div>
   );
 };
 
-ProductListTable.propTypes = {
-  products: PropTypes.array.isRequired,
-  productsCount: PropTypes.number.isRequired,
+ContactListTable.propTypes = {
+  contacts: PropTypes.array.isRequired,
+  contactsCount: PropTypes.number.isRequired,
   onPageChange: PropTypes.func.isRequired,
   onRowsPerPageChange: PropTypes.func,
   page: PropTypes.number.isRequired,
-  rowsPerPage: PropTypes.number.isRequired
+  rowsPerPage: PropTypes.number.isRequired,
+  company_id: PropTypes.number.isRequired
 };

@@ -16,6 +16,7 @@ interface DeleteConfirmationDialogProps {
 
 export const DeleteConfirmationDialog: FC<DeleteConfirmationDialogProps> = (props) => {
 
+
    if(!props.show) {
     return null;
    }

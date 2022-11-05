@@ -16,50 +16,56 @@ import {
 } from '@mui/material';
 import { PencilAlt as PencilAltIcon } from '../../../icons/pencil-alt';
 import { Trash as TrashIcon } from '../../../icons/trash';
-import type { Company } from '../../../types/company';
+import type { Project } from '../../../types/project';
 import { Scrollbar } from '../../scrollbar';
 import { DeleteConfirmationDialog } from '../../../components/dashboard/delete-confirmation-dialog'
 import { useDispatch } from '../../../store';
-import { deleteCompany } from '../../../thunks/company';
+import { deleteProject } from '../../../thunks/project';
 
-interface CompanyListTableProps {
-  companies: Company[];
-  companiesCount: number;
+interface ProjectListTableProps {
+  projects: Project[];
+  projectsCount: number;
   onPageChange: (event: MouseEvent<HTMLButtonElement> | null, newPage: number) => void;
   onRowsPerPageChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   page: number;
   rowsPerPage: number;
+  company_id: number;
 }
 
-export const CompanyListTable: FC<CompanyListTableProps> = (props) => {
+export const ProjectListTable: FC<ProjectListTableProps> = (props) => {
   const {
-    companies,
-    companiesCount,
+    projects,
+    projectsCount,
     onPageChange,
     onRowsPerPageChange,
     page,
     rowsPerPage,
+    company_id,
     ...other
   } = props;
   const dispatch = useDispatch();
   const [show, setShow] = useState<boolean>(false);
-  const [companyId, setCompanyId] = useState<number>(0);
+  const [projectId, setProjectId] = useState<number>(0);
+
+  useEffect(() => {
+    setShow(false);
+  } , [company_id]);
+
 
   const handleDelete = (
     event: MouseEvent<HTMLButtonElement>,
-    companyId: number): void => {
-      setCompanyId(companyId);
+    projectId: number): void => {
+      setProjectId(projectId);
       setShow(true);
   }
 
-  const handleConfirm = async (event: MouseEvent<HTMLButtonElement>, companyId: number): Promise<void>  => {
+  const handleConfirm = async (event: MouseEvent<HTMLButtonElement>, projectId: number): Promise<void>  => {
     try {
-      await dispatch(deleteCompany({
-        "companyId": companyId
+      await dispatch(deleteProject({
+        "projectId": projectId,
+        "company_id": company_id!
       }));
-      // const newLocalCompanies = localCompanies.filter(company => company.id !== companyId);
-      // setLocalCompanies(newLocalCompanies);
-      toast.success('Company deleted!');
+      toast.success('Project deleted!');
     } catch(err) {
       console.error(err);
       toast.error('Something went wrong!');
@@ -71,65 +77,24 @@ export const CompanyListTable: FC<CompanyListTableProps> = (props) => {
 
   return (
     <div {...other}>
-      {/* <Box
-        sx={{
-          backgroundColor: (theme) => theme.palette.mode === 'dark'
-            ? 'neutral.800'
-            : 'neutral.100',
-          display: enableBulkActions ? 'block' : 'none',
-          px: 2,
-          py: 0.5
-        }}
-      >
-        <Checkbox
-          checked={selectedAllCompanies}
-          indeterminate={selectedSomeCompanies}
-          onChange={handleSelectAllCompanies}
-        />
-        <Button
-          size="small"
-          sx={{ ml: 2 }}
-        >
-          Delete
-        </Button>
-        <Button
-          size="small"
-          sx={{ ml: 2 }}
-        >
-          Edit
-        </Button>
-      </Box> */}
       <Scrollbar>
         <Table sx={{ minWidth: 700 }}>
           <TableHead sx={{ visibility: 'visible' }}>
             <TableRow>
-              {/* <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedAllCompanies}
-                  indeterminate={selectedSomeCompanies}
-                  onChange={handleSelectAllCompanies}
-                />
-              </TableCell> */}
               <TableCell>
-                Company Name
+                Project Name
               </TableCell>
               <TableCell>
-                Address 1
+                Start Date
               </TableCell>
               <TableCell>
-                Address 2
+                End Date
               </TableCell>
               <TableCell>
-                City
+                Responsible person
               </TableCell>
               <TableCell>
-                State
-              </TableCell>
-              <TableCell>
-                Country
-              </TableCell>
-              <TableCell>
-                Zip
+                Summary
               </TableCell>
               <TableCell align="right">
                 Actions
@@ -137,23 +102,13 @@ export const CompanyListTable: FC<CompanyListTableProps> = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {companies.map((company) => {
+            {projects.map((project) => {
 
               return (
                 <TableRow
                   hover
-                  key={company.id}
+                  key={project.id}
                 >
-                  {/* <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={isCompanySelected}
-                      onChange={(event) => handleSelectOneCompany(
-                        event,
-                        company.id as unknown as string
-                      )}
-                      value={isCompanySelected}
-                    />
-                  </TableCell> */}
                   <TableCell>
                     <Box
                       sx={{
@@ -162,39 +117,33 @@ export const CompanyListTable: FC<CompanyListTableProps> = (props) => {
                       }}
                     >
                         <NextLink
-                          href={`/dashboard/companies/${company.id}`}
+                          href={`/dashboard/projects/${project.id}`}
                           passHref
                         >
                           <Link
                             color="inherit"
                             variant="subtitle2"
                           >
-                            {company.company_name}
+                            {project.name}
                           </Link>
                         </NextLink>
                     </Box>
                   </TableCell>
                   <TableCell>
-                    {`${company.address_1}`}
+                    {`${project.start_date}`}
                   </TableCell>
                   <TableCell>
-                    {`${company.address_2}`}
+                    {`${project.end_date}`}
                   </TableCell>
                   <TableCell>
-                     {`${company.city}`}
+                     {`${project.resp_person}`}
                   </TableCell>
                   <TableCell>
-                     {`${company.state}`}
-                  </TableCell>
-                  <TableCell>
-                     {`${company.country}`}
-                  </TableCell>
-                  <TableCell>
-                     {`${company.zip}`}
+                     {`${project.summary}`}
                   </TableCell>
                   <TableCell align="right">
                     <NextLink
-                      href={`/dashboard/companies/${company.id}/edit`}
+                      href={`/dashboard/projects/${project.id}/edit`}
                       passHref
                     >
                       <IconButton component="a">
@@ -203,18 +152,10 @@ export const CompanyListTable: FC<CompanyListTableProps> = (props) => {
                     </NextLink>
                     <IconButton component="button" onClick={(event) => handleDelete(
                         event,
-                        company.id as number
+                        project.id as number
                       )}>
                       <TrashIcon fontSize="small" />
                     </IconButton>
-                    {/* <NextLink
-                      href={`/dashboard/companies/${company.id}`}
-                      passHref
-                    >
-                      <IconButton component="a">
-                        <ArrowRightIcon fontSize="small" />
-                      </IconButton>
-                    </NextLink> */}
                   </TableCell>
                 </TableRow>
               );
@@ -224,7 +165,7 @@ export const CompanyListTable: FC<CompanyListTableProps> = (props) => {
       </Scrollbar>
       <TablePagination
         component="div"
-        count={companiesCount}
+        count={projectsCount}
         onPageChange={onPageChange}
         onRowsPerPageChange={onRowsPerPageChange}
         page={page}
@@ -232,9 +173,9 @@ export const CompanyListTable: FC<CompanyListTableProps> = (props) => {
         rowsPerPageOptions={[5, 10, 25]}
       />
       <DeleteConfirmationDialog
-        id={companyId}
-        subject={'company'}
-        onConfirmHandler={(event) => handleConfirm(event, companyId)}
+        id={projectId}
+        subject={'project'}
+        onConfirmHandler={(event) => handleConfirm(event, projectId)}
         onCancelHandler={handleCancel}
         show={show}
         setShow={setShow}
@@ -243,11 +184,12 @@ export const CompanyListTable: FC<CompanyListTableProps> = (props) => {
   );
 };
 
-CompanyListTable.propTypes = {
-  companies: PropTypes.array.isRequired,
-  companiesCount: PropTypes.number.isRequired,
+ProjectListTable.propTypes = {
+  projects: PropTypes.array.isRequired,
+  projectsCount: PropTypes.number.isRequired,
   onPageChange: PropTypes.func.isRequired,
   onRowsPerPageChange: PropTypes.func,
   page: PropTypes.number.isRequired,
-  rowsPerPage: PropTypes.number.isRequired
+  rowsPerPage: PropTypes.number.isRequired,
+  company_id: PropTypes.number.isRequired
 };

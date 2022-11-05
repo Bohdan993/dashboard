@@ -99,7 +99,7 @@ export const CompanyCreateForm: FC = (props) => {
                 onChange={formik.handleChange}
                 value={formik.values.company_name}
               />
-              <TextField
+            <TextField
                 error={Boolean(formik.touched.address_1 && formik.errors.address_1)}
                 fullWidth
                 helperText={formik.touched.address_1 && formik.errors.address_1}

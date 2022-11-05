@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import NextLink from 'next/link';
 import toast from 'react-hot-toast';
@@ -14,45 +15,47 @@ import {
   Typography
 } from '@mui/material';
 import { useDispatch } from '../../../store';
-import { createCompany } from '../../../thunks/company';
+import { createProject } from '../../../thunks/project';
+import { MobileDatePicker } from '@mui/x-date-pickers';
 
+interface ProjectCreateFormProps  {
+  company_id: number;
+}
 
-export const CompanyCreateForm: FC = (props) => {
+export const ProjectCreateForm: FC<ProjectCreateFormProps> = (props) => {
+  const {company_id, ...rest} = props;
   const dispatch = useDispatch();
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(new Date());
   const router = useRouter();
   const formik = useFormik({
     initialValues: {
-      company_name: '',
-      address_1: '',
-      address_2: '',
-      city: '',
-      state: '',
-      country: '',
-      zip: '',
+      name: '',
+      resp_person: '',
+      summary: '',
       submit: null
     },
     validationSchema: Yup.object({
-      company_name: Yup.string().max(255).required(),
-      address_1: Yup.string().max(255).required(),
-      address_2: Yup.string().max(255).required(),
-      city: Yup.string().max(255).required(),
-      state: Yup.string().max(255).required(),
-      country: Yup.string().max(255).required(),
-      zip: Yup.string().max(255).required(),
+      name: Yup.string().max(255).required(),
+      resp_person: Yup.string().max(255).required(),
+      summary: Yup.string().max(255).required()
     }),
     onSubmit: async (values, helpers): Promise<void> => {
+      const startDateObj = new Date(startDate!);
+      const endDateObj = new Date(endDate!);
+
+      const startDateValue: string = `${startDateObj.getFullYear()}-${(startDateObj.getMonth() + 1) < 10 ? ('0' + (startDateObj.getMonth() + 1)) : (startDateObj.getMonth() + 1)}-${startDateObj.getDate() < 10 ? ('0' + startDateObj.getDate()) : startDateObj.getDate()}`;
+      const endDateValue: string = `${endDateObj.getFullYear()}-${(endDateObj.getMonth() + 1) < 10 ? ('0' + (endDateObj.getMonth() + 1)) : (endDateObj.getMonth() + 1)}-${endDateObj.getDate() < 10 ? ('0' + endDateObj.getDate()) : endDateObj.getDate()}`;
       try {
-        await dispatch(createCompany({
-            "company_name": values.company_name, 
-            "address_1": values.address_1, 
-            "address_2": values.address_2, 
-            "city": values.city, 
-            "state": values.state, 
-            "country": values.country, 
-            "zip": values.zip
-        }))
-        toast.success('Company created!');
-        router.push('/dashboard/companies').catch(console.error);
+        await dispatch(createProject({"project" : {
+            "name": values.name, 
+            "start_date": startDateValue, 
+            "end_date": endDateValue, 
+            "resp_person": values.resp_person, 
+            "summary": values.summary, 
+        }, "company_id": company_id }))
+        toast.success('Project created!');
+        router.push('/dashboard/projects').catch(console.error);
         
       } catch (err) {
         console.error(err);
@@ -67,7 +70,7 @@ export const CompanyCreateForm: FC = (props) => {
   return (
     <form
       onSubmit={formik.handleSubmit}
-      {...props}
+      {...rest}
     >
       <Card>
         <CardContent>
@@ -90,81 +93,66 @@ export const CompanyCreateForm: FC = (props) => {
               xs={12}
             >
               <TextField
-                error={Boolean(formik.touched.company_name && formik.errors.company_name)}
+                error={Boolean(formik.touched.name && formik.errors.name)}
                 fullWidth
-                helperText={formik.touched.company_name && formik.errors.company_name}
-                label="Company Name"
-                name="company_name"
+                helperText={formik.touched.name && formik.errors.name}
+                label="Name"
+                name="name"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
-                value={formik.values.company_name}
-              />
-              <TextField
-                error={Boolean(formik.touched.address_1 && formik.errors.address_1)}
-                fullWidth
-                helperText={formik.touched.address_1 && formik.errors.address_1}
-                label="Address 1"
-                name="address_1"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                sx={{ mt: 2 }}
-                value={formik.values.address_1}
+                value={formik.values.name}
               />
             <TextField
-                error={Boolean(formik.touched.address_2 && formik.errors.address_2)}
+                error={Boolean(formik.touched.resp_person && formik.errors.resp_person)}
                 fullWidth
-                helperText={formik.touched.address_2 && formik.errors.address_2}
-                label="Address 2"
-                name="address_2"
+                helperText={formik.touched.resp_person && formik.errors.resp_person}
+                label="Responsible Person"
+                name="resp_person"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 sx={{ mt: 2 }}
-                value={formik.values.address_2}
+                value={formik.values.resp_person}
               />
             <TextField
-                error={Boolean(formik.touched.city && formik.errors.city)}
+                error={Boolean(formik.touched.summary && formik.errors.summary)}
                 fullWidth
-                helperText={formik.touched.city && formik.errors.city}
-                label="City"
-                name="city"
+                helperText={formik.touched.summary && formik.errors.summary}
+                label="Summary"
+                name="summary"
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 sx={{ mt: 2 }}
-                value={formik.values.city}
+                value={formik.values.summary}
               />
-            <TextField
-                error={Boolean(formik.touched.state && formik.errors.state)}
-                fullWidth
-                helperText={formik.touched.state && formik.errors.state}
-                label="State"
-                name="state"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                sx={{ mt: 2 }}
-                value={formik.values.state}
+                        <Box
+            sx={{
+              display: 'flex',
+              mt: 4
+            }}
+          >
+            <Box sx={{ mr: 2 }}>
+              <MobileDatePicker
+                label="Start Date"
+                onChange={(newDate) => setStartDate(newDate)}
+                renderInput={(inputProps) => (
+                  <TextField 
+                    {...inputProps} 
+                  />
+                )}
+                value={startDate}
               />
-            <TextField
-                error={Boolean(formik.touched.country && formik.errors.country)}
-                fullWidth
-                helperText={formik.touched.country && formik.errors.country}
-                label="Country"
-                name="country"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                sx={{ mt: 2 }}
-                value={formik.values.country}
-              />
-            <TextField
-                error={Boolean(formik.touched.zip && formik.errors.zip)}
-                fullWidth
-                helperText={formik.touched.zip && formik.errors.zip}
-                label="Zip"
-                name="zip"
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                sx={{ mt: 2 }}
-                value={formik.values.zip}
-              />
+            </Box>
+            <MobileDatePicker
+              label="End Date"
+              onChange={(newDate) => setEndDate(newDate)}
+              renderInput={(inputProps) => (
+                <TextField 
+                  {...inputProps} 
+                />
+              )}
+              value={endDate}
+            />
+          </Box>
             </Grid>
           </Grid>
         </CardContent>
@@ -180,7 +168,7 @@ export const CompanyCreateForm: FC = (props) => {
         }}
       >
         <NextLink
-          href="/dashboard/companies"
+          href="/dashboard/projects"
           passHref
         >
           <Button

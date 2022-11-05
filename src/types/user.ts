@@ -3,7 +3,7 @@ export interface User {
   first_name: string;
   last_name: string;
   id: number;
-  avatar: string|null;
+  avatar: string;
   is_email_verif: boolean;
   [key: string]: any;
 }

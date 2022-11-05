@@ -85,18 +85,18 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
           <Typography variant="body1">
             {user.name}
           </Typography>
-          <Typography
+          {/* <Typography
             color="textSecondary"
             variant="body2"
           >
             Acme Inc
-          </Typography>
+          </Typography> */}
         </Box>
       </Box>
       <Divider />
       <Box sx={{ my: 1 }}>
         <NextLink
-          href="/dashboard/social/profile"
+          href="/dashboard/profile"
           passHref
         >
           <MenuItem component="a">
@@ -112,7 +112,7 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
             />
           </MenuItem>
         </NextLink>
-        <NextLink
+        {/* <NextLink
           href="/dashboard/account"
           passHref
         >
@@ -145,7 +145,7 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
               )}
             />
           </MenuItem>
-        </NextLink>
+        </NextLink> */}
         <Divider />
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>

@@ -1,10 +1,12 @@
-import type { FC } from 'react';
-import { useState } from 'react';
+import type { FC, MouseEvent } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import NextLink from 'next/link';
+import type { Contact } from '../../../types/contact';
 import toast from 'react-hot-toast';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
+import { DeleteConfirmationDialog } from '../../../components/dashboard/delete-confirmation-dialog'
 import {
   Box,
   Button,
@@ -14,31 +16,42 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import { useDispatch } from '../../../store';
-import { createContact } from '../../../thunks/contact';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 
-interface ContactCreateFormProps  {
-  company_id: number;
+import { useDispatch } from '../../../store';
+import { updateContact, deleteContact } from '../../../thunks/contact';
+
+interface ContactEditFormProps {
+    id: number;
+    contact: Contact;
+    company_id: number;
 }
 
-export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
-  const {company_id, ...rest} = props;
-  const dispatch = useDispatch();
+
+export const ContactEditForm: FC<ContactEditFormProps> = (props) => {
+  const {id, company_id, contact, ...rest} = props;
+  const [show, setShow] = useState<boolean>(false);
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    setShow(false);
+  } , [company_id]);
+    
+
   const formik = useFormik({
     initialValues: {
-      type: '',
-      name: '',
-      email: '',
-      phone_num: '',
-      address_1: '',
-      address_2: '',
-      city: '',
-      state: '',
-      country: '',
-      zip: '',
-      submit: null
+      type: contact?.type || '',
+      name: contact?.name || '',
+      email: contact?.email || '',
+      phone_num: contact?.phone_num || '',
+      address_1: contact?.address_1 || '',
+      address_2: contact?.address_2 || '',
+      city: contact?.city || '',
+      state: contact?.state || '',
+      country: contact?.country || '',
+      zip: contact?.zip || '',
+      submit: null,
     },
     validationSchema: Yup.object({
       type: Yup.string().max(255).required(),
@@ -54,21 +67,21 @@ export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
     }),
     onSubmit: async (values, helpers): Promise<void> => {
       try {
-        await dispatch(createContact({"contact" : {
-            "type": values.type,
-            "name": values.name,
-            "email": values.email,
-            "phone_num": values.phone_num,
-            "address_1": values.address_1,
-            "address_2": values.address_2,
-            "city": values.city,
-            "state": values.state,
-            "country": values.country,
-            "zip": values.zip
-        }, "company_id": company_id }))
-        toast.success('Contact created!');
+        await dispatch(updateContact({"contact" : {
+          "id": id,
+          "type": values.type,
+          "name": values.name,
+          "email": values.email,
+          "phone_num": values.phone_num,
+          "address_1": values.address_1,
+          "address_2": values.address_2,
+          "city": values.city,
+          "state": values.state,
+          "country": values.country,
+          "zip": values.zip
+      }, "company_id": company_id }))
+        toast.success('Contact updated!');
         router.push('/dashboard/contacts').catch(console.error);
-        
       } catch (err) {
         console.error(err);
         toast.error('Something went wrong!');
@@ -79,27 +92,52 @@ export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
     },
   });
 
+
+  const handleDelete = (
+    event: MouseEvent<HTMLButtonElement>): void => {
+      setShow(true);
+  }
+
+  const handleConfirm = async (event: MouseEvent<HTMLButtonElement>, contactId: number): Promise<void>  => {
+    try {
+      await dispatch(deleteContact({
+        "contactId": contactId,
+        "company_id": company_id
+      }));
+      toast.success('Contact deleted!');
+      router.push('/dashboard/contacts').catch(console.error);
+    } catch(err) {
+      console.error(err);
+      toast.error('Something went wrong!');
+    }
+  }
+
+  const handleCancel = (event: MouseEvent<HTMLButtonElement>): void  => {
+  }
+
+
   return (
-    <form
-      onSubmit={formik.handleSubmit}
-      {...rest}
-    >
-      <Card>
-        <CardContent>
-          <Grid
-            container
-            spacing={3}
-          >
+    <>
+      <form
+        onSubmit={formik.handleSubmit}
+        {...rest}
+      >
+        <Card>
+          <CardContent>
             <Grid
-              item
-              md={4}
-              xs={12}
+              container
+              spacing={3}
             >
-              <Typography variant="h6">
-                Basic info
-              </Typography>
-            </Grid>
-            <Grid
+              <Grid
+                item
+                md={4}
+                xs={12}
+              >
+                <Typography variant="h6">
+                  Basic info
+                </Typography>
+              </Grid>
+              <Grid
               item
               md={8}
               xs={12}
@@ -215,43 +253,61 @@ export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
                 sx={{ mt: 2 }}
                 value={formik.values.zip}
               />
-            </Grid>
           </Grid>
-        </CardContent>
-      </Card>
-      <Box
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          mx: -1,
-          mb: -1,
-          mt: 3
-        }}
-      >
-        <NextLink
-          href="/dashboard/contacts"
-          passHref
+        </Grid>
+          </CardContent>
+        </Card>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            mx: -1,
+            mb: -1,
+            mt: 3
+          }}
         >
           <Button
-            component="a"
+            color="error"
+            onClick={handleDelete}
             sx={{
               m: 1,
               mr: 'auto'
             }}
-            variant="outlined"
           >
-            Cancel
+            Delete
           </Button>
-        </NextLink>
-        <Button
-          sx={{ m: 1 }}
-          type="submit"
-          variant="contained"
-        >
-          Create
-        </Button>
-      </Box>
-    </form>
+          <NextLink
+            href="/dashboard/contacts"
+            passHref
+          >
+            <Button
+              component="a"
+              sx={{
+                m: 1
+              }}
+              variant="outlined"
+            >
+              Cancel
+            </Button>
+          </NextLink>
+          <Button
+            sx={{ m: 1 }}
+            type="submit"
+            variant="contained"
+          >
+            Update
+          </Button>
+        </Box>
+      </form>
+      <DeleteConfirmationDialog
+        id={id}
+        subject={'contact'}
+        onConfirmHandler={(event) => handleConfirm(event, id)}
+        onCancelHandler={handleCancel}
+        show={show}
+        setShow={setShow}
+    />
+  </>
   );
 };

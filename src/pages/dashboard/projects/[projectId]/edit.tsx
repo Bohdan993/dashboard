@@ -7,49 +7,75 @@ import Head from 'next/head';
 import { Box, Breadcrumbs, Container, Link, Typography } from '@mui/material';
 import { AuthGuard } from '../../../../components/authentication/auth-guard';
 import { DashboardLayout } from '../../../../components/dashboard/dashboard-layout';
-import { CompanyEditForm } from '../../../../components/dashboard/company/company-edit-form';
-import { gtm } from '../../../../lib/gtm';
-import { companiesApi } from '../../../../api/companies-api';
-import type { Company } from '../../../../types/company';
+import { ProjectEditForm } from '../../../../components/dashboard/project/project-edit-form';
+import { projectsApi } from '../../../../api/projects-api';
+import type { Project } from '../../../../types/project';
+import { useSelector } from '../../../../store';
 
-const CompanyEdit: NextPage = () => {
+const ProjectEdit: NextPage = () => {
   const router = useRouter();
-  const {companyId} = router.query;
+  const {projectId} = router.query;
   const isMounted = useMounted();
-  const [company, setCompany] = useState<Company | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
+  const { activeCompany } = useSelector((state) => state.company);
+
+
   useEffect(() => {
     // gtm.push({ event: 'page_view' });
   }, []);
 
-  const getCompany = useCallback(async () => {
+  const getProject = useCallback(async () => {
     try {
-      const data = await companiesApi.getCompany(Number(companyId));
+      const data = await projectsApi.getProject(Number(projectId), activeCompany?.id!);
 
       if (isMounted()) {
-        setCompany(data);
+        setProject(data);
       }
+
     } catch (err) {
       console.error(err);
+      setProject(null);
     }
-  }, [isMounted, companyId]);
+  }, [isMounted, projectId, activeCompany]);
 
   useEffect(
     () => {
-      getCompany();
+      if(activeCompany && activeCompany.id) { 
+        getProject();
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [activeCompany]
   );
 
-  if (!company) {
+  if(!activeCompany) {
     return null;
   }
+
+  if (!project) {
+      return (<Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          py: 8
+        }}
+      >
+        <Container maxWidth="md">
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h4">
+              Project doesn't exist
+            </Typography>
+          </Box>
+         </Container>
+        </Box>);
+  }
+
 
   return (
     <>
       <Head>
         <title>
-          Dashboard: Company Edit | Material Kit Pro
+          Dashboard: Project Edit | Material Kit Pro
         </title>
       </Head>
       <Box
@@ -62,7 +88,7 @@ const CompanyEdit: NextPage = () => {
         <Container maxWidth="md">
           <Box sx={{ mb: 3 }}>
             <Typography variant="h4">
-              Update company id {companyId}
+              Update project id {projectId}
             </Typography>
             <Breadcrumbs
               separator="/"
@@ -77,29 +103,33 @@ const CompanyEdit: NextPage = () => {
                 </Link>
               </NextLink>
               <NextLink
-                href="/dashboard/companies"
+                href="/dashboard/projects"
                 passHref
               >
                 <Link variant="subtitle2">
-                  Companies
+                  Projects
                 </Link>
               </NextLink>
               <Typography
                 color="textSecondary"
                 variant="subtitle2"
               >
-                Edit company
+                Edit project
               </Typography>
             </Breadcrumbs>
           </Box>
-          <CompanyEditForm id={Number(companyId)} company={company}/>
+          <ProjectEditForm 
+              id={Number(projectId)} 
+              project={project}
+              company_id={activeCompany && activeCompany.id!}
+            />
         </Container>
       </Box>
     </>
   );
 };
 
-CompanyEdit.getLayout = (page) => (
+ProjectEdit.getLayout = (page) => (
   <AuthGuard>
     <DashboardLayout>
       {page}
@@ -107,4 +137,4 @@ CompanyEdit.getLayout = (page) => (
   </AuthGuard>
 );
 
-export default CompanyEdit;
+export default ProjectEdit;

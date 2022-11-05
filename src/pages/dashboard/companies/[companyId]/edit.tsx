@@ -42,7 +42,7 @@ const CompanyEdit: NextPage = () => {
   );
 
   if (!company) {
-    return null;
+    return <p>Company doesn't exist.</p>;
   }
 
   return (

@@ -15,28 +15,27 @@ import {
 } from '@mui/material';
 import { AuthGuard } from '../../../components/authentication/auth-guard';
 import { DashboardLayout } from '../../../components/dashboard/dashboard-layout';
-import { CompanyListTable } from '../../../components/dashboard/company/company-list-table';
+import { ContactListTable } from '../../../components/dashboard/contact/contact-list-table';
 import { useMounted } from '../../../hooks/use-mounted';
 import { Plus as PlusIcon } from '../../../icons/plus';
 import { Search as SearchIcon } from '../../../icons/search';
-import type { Company } from '../../../types/company';
+import type { Contact } from '../../../types/contact';
 import { useDispatch, useSelector } from '../../../store';
-import { getCompanies as getCompaniesFunc } from '../../../thunks/company';
+import { getContacts as getContactsFunc } from '../../../thunks/contact';
 
 interface Filters {
   query?: string;
-  // hasAcceptedMarketing?: boolean;
-  // isProspect?: boolean;
-  // isReturning?: boolean;
 }
 
-type SortField = 'company_name' | 'country';
+type SortField = 'name' | 'email' | 'country';
 
 type SortDir = 'asc' | 'desc';
 
 type Sort =
-  | 'company_name|desc'
-  | 'company_name|asc'
+  | 'name|desc'
+  | 'name|asc'
+  | 'email|desc'
+  | 'email|asc'
   | 'country|desc'
   | 'country|asc';
 
@@ -45,40 +44,23 @@ interface SortOption {
   value: Sort;
 }
 
-// type TabValue = 'all' | 'hasAcceptedMarketing' | 'isProspect' | 'isReturning';
-
-// interface Tab {
-//   label: string;
-//   value: TabValue;
-// }
-
-// const tabs: Tab[] = [
-//   {
-//     label: 'All',
-//     value: 'all'
-//   },
-//   {
-//     label: 'Accepts Marketing',
-//     value: 'hasAcceptedMarketing'
-//   },
-//   {
-//     label: 'Prospect',
-//     value: 'isProspect'
-//   },
-//   {
-//     label: 'Returning',
-//     value: 'isReturning'
-//   }
-// ];
 
 const sortOptions: SortOption[] = [
   {
-    label: 'Company Name(A-Z)',
-    value: 'company_name|asc'
+    label: 'Contact Name(A-Z)',
+    value: 'name|asc'
   },
   {
-    label: 'Company Name(Z-A)',
-    value: 'company_name|desc'
+    label: 'Contact Name(Z-A)',
+    value: 'name|desc'
+  },
+  {
+    label: 'Email (A-Z)',
+    value: 'email|asc'
+  },
+  {
+    label: 'Email (Z-A)',
+    value: 'email|desc'
   },
   {
     label: 'Country (A-Z)',
@@ -87,19 +69,19 @@ const sortOptions: SortOption[] = [
   {
     label: 'Country (Z-A)',
     value: 'country|desc'
-  },
+  }
 ];
 
 const applyFilters = (
-  companies: Company[],
+  contacts: Contact[],
   filters: Filters
-): Company[] => companies.filter((company) => {
+): Contact[] => contacts.filter((contact) => {
   if (filters.query) {
     let queryMatched = false;
-    const properties: ('country' | 'company_name')[] = ['country', 'company_name'];
+    const properties: ('name' | 'email' | 'country' )[] = ['name', 'email', 'country'];
 
     properties.forEach((property) => {
-      if ((company[property]).toLowerCase().includes(filters.query!.toLowerCase())) {
+      if ((contact[property]).toLowerCase().includes(filters.query!.toLowerCase())) {
         queryMatched = true;
       }
     });
@@ -109,22 +91,10 @@ const applyFilters = (
     }
   }
 
-  // if (filters.hasAcceptedMarketing && !company.hasAcceptedMarketing) {
-  //   return false;
-  // }
-
-  // if (filters.isProspect && !company.isProspect) {
-  //   return false;
-  // }
-
-  // if (filters.isReturning && !company.isReturning) {
-  //   return false;
-  // }
-
   return true;
 });
 
-const descendingComparator = (a: Company, b: Company, sortBy: SortField): number => {
+const descendingComparator = (a: Contact, b: Contact, sortBy: SortField): number => {
   // When compared to something undefined, always returns false.
   // This means that if a field does not exist from either element ('a' or 'b') the return will be 0.
 
@@ -140,14 +110,14 @@ const descendingComparator = (a: Company, b: Company, sortBy: SortField): number
 
 const getComparator = (sortDir: SortDir, sortBy: SortField) => (
   sortDir === 'desc'
-    ? (a: Company, b: Company) => descendingComparator(a, b, sortBy)
-    : (a: Company, b: Company) => -descendingComparator(a, b, sortBy)
+    ? (a: Contact, b: Contact) => descendingComparator(a, b, sortBy)
+    : (a: Contact, b: Contact) => -descendingComparator(a, b, sortBy)
 );
 
-const applySort = (companies: Company[], sort: Sort): Company[] => {
+const applySort = (contacts: Contact[], sort: Sort): Contact[] => {
   const [sortBy, sortDir] = sort.split('|') as [SortField, SortDir];
   const comparator = getComparator(sortDir, sortBy);
-  const stabilizedThis = companies.map((el, index) => [el, index]);
+  const stabilizedThis = contacts.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
     // @ts-ignore
@@ -166,69 +136,44 @@ const applySort = (companies: Company[], sort: Sort): Company[] => {
 };
 
 const applyPagination = (
-  companies: Company[],
+  contacts: Contact[],
   page: number,
   rowsPerPage: number
-): Company[] => companies.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+): Contact[] => contacts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
-const CompaniesList: NextPage = () => {
+const ContactsList: NextPage = () => {
   const isMounted = useMounted();
   const queryRef = useRef<HTMLInputElement | null>(null);
-  const { companies } = useSelector((state) => state.company);
-  // const [currentTab, setCurrentTab] = useState<TabValue>('all');
+  const { contacts } = useSelector((state) => state.contact);
+  const { activeCompany } = useSelector((state) => state.company);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [sort, setSort] = useState<Sort>(sortOptions[0].value);
   const [filters, setFilters] = useState<Filters>({
     query: ''
-    // hasAcceptedMarketing: undefined,
-    // isProspect: undefined,
-    // isReturning: undefined
   });
   const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   gtm.push({ event: 'page_view' });
-  // }, []);
-
-  const getCompanies = useCallback(async () => {
+  const getContacts = useCallback(async () => {
     try {
       if (isMounted()) {
-        dispatch(getCompaniesFunc());
+        dispatch(getContactsFunc({company_id: activeCompany?.id!}));
       }
     } catch (err) {
       console.error(err);
     }
-  }, [isMounted]);
+  }, [isMounted, activeCompany]);
 
   useEffect(
     () => {
-      let t: ReturnType<typeof setTimeout> = setTimeout(() => {
-        if(companies.length === 0) {
-          getCompanies();
-        }
-      }, 250)
-      return () => {clearTimeout(t); }
+      if(activeCompany && activeCompany.id) {
+        getContacts();
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [companies]
+    [activeCompany]
   );
 
-  // const handleTabsChange = (event: ChangeEvent<{}>, value: TabValue): void => {
-  //   const updatedFilters: Filters = {
-  //     ...filters,
-  //     hasAcceptedMarketing: undefined,
-  //     isProspect: undefined,
-  //     isReturning: undefined
-  //   };
-
-  //   if (value !== 'all') {
-  //     updatedFilters[value] = true;
-  //   }
-
-  //   setFilters(updatedFilters);
-  //   setCurrentTab(value);
-  // };
 
   const handleQueryChange = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -251,16 +196,19 @@ const CompaniesList: NextPage = () => {
   };
 
   // Usually query is done on backend with indexing solutions
-  const filteredCompanies = applyFilters(companies, filters);
-  const sortedCompanies = applySort(filteredCompanies, sort);
-  const paginatedCompanies = applyPagination(sortedCompanies, page, rowsPerPage);
+  const filteredContacts = applyFilters(contacts, filters);
+  const sortedContacts = applySort(filteredContacts, sort);
+  const paginatedContacts = applyPagination(sortedContacts, page, rowsPerPage);
 
+  if(!activeCompany) {
+    return null;
+  }
 
   return (
     <>
       <Head>
         <title>
-          Dashboard: Companies List | Material Kit Pro
+          Dashboard: Contacts List | Material Kit Pro
         </title>
       </Head>
       <Box
@@ -279,12 +227,12 @@ const CompaniesList: NextPage = () => {
             >
               <Grid item>
                 <Typography variant="h4">
-                  Companies
+                  Contacts
                 </Typography>
               </Grid>
               <Grid item>
               <NextLink
-                  href="/dashboard/companies/new"
+                  href="/dashboard/contacts/new"
                   passHref
                 >
                   <Button
@@ -327,7 +275,7 @@ const CompaniesList: NextPage = () => {
                       </InputAdornment>
                     )
                   }}
-                  placeholder="Search companies"
+                  placeholder="Search contacts"
                 />
               </Box>
               <TextField
@@ -349,13 +297,14 @@ const CompaniesList: NextPage = () => {
                 ))}
               </TextField>
             </Box>
-            <CompanyListTable
-              companies={paginatedCompanies}
-              companiesCount={sortedCompanies.length}
+            <ContactListTable
+              contacts={paginatedContacts}
+              contactsCount={sortedContacts.length}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
               rowsPerPage={rowsPerPage}
               page={page}
+              company_id={activeCompany && activeCompany.id!}
             />
           </Card>
         </Container>
@@ -364,7 +313,7 @@ const CompaniesList: NextPage = () => {
   );
 };
 
-CompaniesList.getLayout = (page) => (
+ContactsList.getLayout = (page) => (
   <AuthGuard>
     <DashboardLayout>
       {page}
@@ -372,4 +321,4 @@ CompaniesList.getLayout = (page) => (
   </AuthGuard>
 );
 
-export default CompaniesList;
+export default ContactsList;
