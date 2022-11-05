@@ -28,14 +28,14 @@ interface AccountPopoverProps {
 export const AccountPopover: FC<AccountPopoverProps> = (props) => {
   const { anchorEl, onClose, open, ...other } = props;
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   // To get the user from the authContext, you can use
   // `const { user } = useAuth();`
-  const user = {
-    avatar: '/static/mock-images/avatars/avatar-anika_visser.png',
-    name: 'Anika Visser'
-  };
-
+  // const user = {
+  //   avatar: '/static/mock-images/avatars/avatar-anika_visser.png',
+  //   name: 'Anika Visser'
+  // };
+  console.log(user);
   const handleLogout = async (): Promise<void> => {
     try {
       onClose?.();
@@ -69,7 +69,7 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
         }}
       >
         <Avatar
-          src={user.avatar}
+          src={user?.avatar}
           sx={{
             height: 40,
             width: 40
@@ -83,7 +83,7 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
           }}
         >
           <Typography variant="body1">
-            {user.name}
+            {user?.first_name} {user?.last_name}
           </Typography>
           {/* <Typography
             color="textSecondary"

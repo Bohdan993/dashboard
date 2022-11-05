@@ -7,8 +7,6 @@ import { useMounted } from '../../hooks/use-mounted';
 import { Google as GoogleIcon } from '../../icons/google';
 import { Microsoft as MicrosoftIcon } from '../../icons/microsoft';
 import { useGoogleLogin } from '@react-oauth/google';
-// import GoogleLogin from 'react-google-login';
-// import { gapi } from "gapi-script";
 
 
 
@@ -85,7 +83,7 @@ export const SocialMediaLogin: FC = (props) => {
           type="button"
           variant="text"
           sx={{mr: 2}}
-          onClick={() => login()}
+          onClick={(e) => onClick('google', e)}
         >
           <GoogleIcon/>
         </Button>

@@ -142,21 +142,28 @@ class AuthApi {
 
   };
 
-  async loginGoogle({idToken, data}: {data: GoogleData; idToken: string}): LoginResponse {
+  async loginGoogle(): LoginResponse {
 
-    let _this = this;
 
     return new Promise(async (resolve, reject) => {
       try {
 
-        const { accessToken } = await _this.validateTokenAndObtainSession({data, idToken});
+        const res = await fetch(`${baseUrl}/auth/google`, {
+          method: "GET",
+          headers: {
+            'accept': 'application/json'
+          },
+        })
 
-        if (!accessToken) {
+        const data: TokenData = await res.json();
+
+        if (!data) {
           reject(new Error('Please check your email and password'));
           return;
         }
 
-        resolve({ accessToken });
+        resolve({ accessToken: data.access_token });
+        
       } catch (err) {
         console.error('[Auth Api]: ', err);
         reject(new Error('Internal server error'));

@@ -18,6 +18,9 @@ export interface AuthContextValue extends State {
   loginMS: () => Promise<void>;
   loginGoogle: (response: any) => Promise<void>;
   register: (email: string, first_name: string, last_name: string, password: string) => Promise<void>;
+  updateUser: () => Promise<void>;
+  updateUserAvatar: () => Promise<void>;
+  deleteUser: () => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -35,6 +38,9 @@ enum ActionType {
   LOGIN = 'LOGIN',
   LOGOUT = 'LOGOUT',
   REGISTER = 'REGISTER',
+  UPDATE_USER = 'UPDATE_USER',
+  UPDATE_USER_AVATAR = 'UPDATE_USER_AVATAR',
+  DELETE_USER = 'DELETE_USER'
 }
 
 type InitializeAction = {
@@ -63,11 +69,32 @@ type RegisterAction = {
   };
 };
 
+type UpdateUserAction = {
+  type: ActionType.UPDATE_USER;
+  payload: {
+    user: User;
+  };
+};
+
+type UpdateUserAvatarAction = {
+  type: ActionType.UPDATE_USER_AVATAR;
+  payload: {
+    avatar: string;
+  };
+};
+
+type DeleteUserAction = {
+  type: ActionType.DELETE_USER;
+};
+
 type Action =
   | InitializeAction
   | LoginAction
   | LogoutAction
-  | RegisterAction;
+  | RegisterAction
+  | UpdateUserAction
+  | UpdateUserAvatarAction
+  | DeleteUserAction
 
 type Handler = (state: State, action: any) => State;
 
@@ -110,7 +137,29 @@ const handlers: Record<ActionType, Handler> = {
       isAuthenticated: true,
       user
     };
-  }
+  },
+  UPDATE_USER: (state: State, action: UpdateUserAction): State => {
+    const { user } = action.payload;
+
+    return {
+      ...state,
+      user
+    };
+  },
+  UPDATE_USER_AVATAR: (state: State, action: UpdateUserAvatarAction): State => {
+    const { avatar } = action.payload;
+    const oldUser: User = state.user!;
+    const user = {...oldUser, avatar};
+    return {
+      ...state,
+      user
+    };
+  },
+  DELETE_USER: (state: State): State => ({
+    ...state,
+    isAuthenticated: false,
+    user: null
+  }),
 };
 
 const reducer = (state: State, action: Action): State => (
@@ -124,7 +173,10 @@ export const AuthContext = createContext<AuthContextValue>({
   loginMS: () => Promise.resolve(),
   loginGoogle: () => Promise.resolve(),
   logout: () => Promise.resolve(),
-  register: () => Promise.resolve()
+  register: () => Promise.resolve(),
+  updateUser: () => Promise.resolve(),
+  updateUserAvatar: () => Promise.resolve(),
+  deleteUser: () => Promise.resolve()
 });
 
 export const AuthProvider: FC<AuthProviderProps> = (props) => {
@@ -198,16 +250,9 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     });
   };
 
-  const loginGoogle = async (response: any): Promise<void> => {
+  const loginGoogle = async (): Promise<void> => {
 
-    const idToken: string = response.tokenId;
-    const data: GoogleData = {
-      email: response.profileObj.email,
-      first_name: response.profileObj.givenName,
-      last_name: response.profileObj.familyName
-    };
-
-    const { accessToken } = await authApi.loginGoogle({idToken, data});
+    const { accessToken } = await authApi.loginGoogle();
     const user = await authApi.me({ accessToken });
 
     localStorage.setItem('accessToken', accessToken);
@@ -244,6 +289,18 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     });
   };
 
+  const updateUser = async (): Promise<void> => {
+
+  }
+
+  const updateUserAvatar = async (): Promise<void> => {
+    
+  }
+
+  const deleteUser = async (): Promise<void> => {
+    
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -253,7 +310,10 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
         logout,
         register,
         loginMS,
-        loginGoogle
+        loginGoogle,
+        updateUser,
+        updateUserAvatar,
+        deleteUser
       }}
     >
       {children}
