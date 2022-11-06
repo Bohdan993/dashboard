@@ -251,13 +251,13 @@ export const CompanyEditForm: FC<CompanyEditFormProps> = (props) => {
         </Box>
       </form>
       <DeleteConfirmationDialog
-        id={id}
-        subject={'company'}
-        onConfirmHandler={(event) => handleConfirm(event, id)}
-        onCancelHandler={handleCancel}
-        show={show}
-        setShow={setShow}
-    />
+          id={id}
+          subject={'company'}
+          onConfirmHandler={(event) => handleConfirm(event, id)}
+          onCancelHandler={handleCancel}
+          show={show}
+          setShow={setShow}
+      />
   </>
   );
 };

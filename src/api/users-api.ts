@@ -4,53 +4,27 @@ const baseUrl:string = "http://api.platops.cloud:8001";
 
 type GetUserResponse = Promise<User>;
 
-type UpdateUserRequest = User;
+type UpdateUserRequest = {
+    email: string;
+    first_name: string;
+    last_name: string;
+};
+
+type UpdateUserAvatarRequest = {
+    avatar: string;
+};
 
 type GetUserRequest = {};
 
 class UsersApi {
 
-    async getUser(request?: GetUserRequest): GetUserResponse {
-        const accessToken = localStorage.getItem('accessToken');
-    
-        return new Promise(async (resolve, reject) => {
-          try {
-    
-            const res = await fetch(`${baseUrl}/users/me`, {
-              method: "GET",
-              headers: {
-                'accept': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
-              }
-            })
-    
-            if(!res.ok && res.status!==200)
-            {
-               throw new Error(String(res.status));
-            }
-    
-            const user: User = await res.json();
-    
-            if (!user) {
-              reject(new Error('Invalid authorization token'));
-              return;
-            }
-    
-            resolve(user);
-          } catch (err) {
-            console.error('[Auth Api]: ', err);
-            reject(new Error('Internal server error'));
-          }
-        });
-      }
-
-    async updateUser(user_id: number, request: UpdateUserRequest) : GetUserResponse {
-        const { user_name, first_name, last_name } = request;
+    async updateUser(request: UpdateUserRequest) : GetUserResponse {
+        const { email, first_name, last_name } = request;
         const accessToken = localStorage.getItem('accessToken');
 
         return new Promise(async (resolve, reject) => {
             try {
-                const res = await fetch(`${baseUrl}/users/${user_id}`, {
+                const res = await fetch(`${baseUrl}/users/me/update`, {
                 method: "PUT",
                 headers: {
                     'Content-Type': 'application/json',
@@ -58,7 +32,7 @@ class UsersApi {
                     'Authorization': `Bearer ${accessToken}`
                 },
                 body: JSON.stringify({
-                    'email': user_name,
+                    'email': email,
                     'first_name': first_name,
                     'last_name': last_name
                 })
@@ -85,21 +59,21 @@ class UsersApi {
         });
     }
 
-    async updateUserAvatar(user_id: number, request: UpdateUserRequest) : GetUserResponse {
+    async updateUserAvatar(request: UpdateUserAvatarRequest) : GetUserResponse {
         const { avatar } = request;
         const accessToken = localStorage.getItem('accessToken');
 
         return new Promise(async (resolve, reject) => {
             try {
-                const res = await fetch(`${baseUrl}/users/${user_id}`, {
-                method: "PUT",
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${accessToken}`
-                },
-                body: {
-                    'avatar': avatar,
-                    }
+                const formData  = new FormData();
+                formData.append("avatar", avatar);
+
+                const res = await fetch(`${baseUrl}/users/me/update-avatar`, {
+                    method: "PUT",
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: formData
                 })
         
                 if(!res.ok && res.status!==200)
@@ -123,12 +97,12 @@ class UsersApi {
         });
     }
 
-    async deleteUser(user_id: number): Promise<void>{
+    async deleteUser(): Promise<void>{
         const accessToken = localStorage.getItem('accessToken');
 
         return new Promise(async (resolve, reject) => {
             try {
-                const res = await fetch(`${baseUrl}/users/${user_id}`, {
+                const res = await fetch(`${baseUrl}/users/delete`, {
                 method: "DELETE",
                 headers: {
                     'Content-Type': 'application/json',

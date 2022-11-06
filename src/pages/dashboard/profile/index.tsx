@@ -5,27 +5,17 @@ import Head from 'next/head';
 import { Box, Container, Divider, Tab, Tabs, Typography } from '@mui/material';
 import { AuthGuard } from '../../../components/authentication/auth-guard';
 import { DashboardLayout } from '../../../components/dashboard/dashboard-layout';
-import { AccountBillingSettings } from '../../../components/dashboard/account/account-billing-settings';
 import { ProfileGeneralSettings } from '../../../components/dashboard/profile/profile-general-settings';
-import { AccountNotificationsSettings } from '../../../components/dashboard/account/account-notifications-settings';
-import { AccountTeamSettings } from '../../../components/dashboard/account/account-team-settings';
-import { AccountSecuritySettings } from '../../../components/dashboard/account/account-security-settings';
-import { gtm } from '../../../lib/gtm';
+import { useAuth } from '../../../hooks/use-auth';
 
 const tabs = [
-  { label: 'General', value: 'general' },
-//   { label: 'Billing', value: 'billing' },
-//   { label: 'Team', value: 'team' },
-//   { label: 'Notifications', value: 'notifications' },
-  // { label: 'Security', value: 'security' }
+  { label: 'General', value: 'general' }
 ];
 
 const Account: NextPage = () => {
   const [currentTab, setCurrentTab] = useState<string>('general');
+  const auth = useAuth();
 
-  useEffect(() => {
-    gtm.push({ event: 'page_view' });
-  }, []);
 
   const handleTabsChange = (event: ChangeEvent<{}>, value: string): void => {
     setCurrentTab(value);
@@ -67,7 +57,7 @@ const Account: NextPage = () => {
             ))}
           </Tabs>
           <Divider sx={{ mb: 3 }} />
-          {currentTab === 'general' && <ProfileGeneralSettings />}
+          {currentTab === 'general' && <ProfileGeneralSettings auth={auth} />}
           {/* {currentTab === 'billing' && <AccountBillingSettings />}
           {currentTab === 'team' && <AccountTeamSettings />}
           {currentTab === 'notifications' && <AccountNotificationsSettings />} */}

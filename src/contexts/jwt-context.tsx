@@ -2,8 +2,8 @@ import type { FC, ReactNode } from 'react';
 import { createContext, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { authApi } from '../api/auth-api';
+import { usersApi } from '../api/users-api';
 import type { User } from '../types/user';
-import { StringMap } from 'i18next';
 
 interface State {
   isInitialized: boolean;
@@ -15,11 +15,11 @@ export interface AuthContextValue extends State {
   platform: 'JWT';
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  loginMS: () => Promise<void>;
+  // loginMS: () => Promise<void>;
   loginGoogle: (response: any) => Promise<void>;
   register: (email: string, first_name: string, last_name: string, password: string) => Promise<void>;
-  updateUser: () => Promise<void>;
-  updateUserAvatar: () => Promise<void>;
+  updateUser: (email: string, first_name: string, last_name: string) => Promise<void>;
+  updateUserAvatar: (avatar: string) => Promise<void>;
   deleteUser: () => Promise<void>;
 }
 
@@ -27,11 +27,11 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-type GoogleData = {
-  email: string;
-  first_name: string;
-  last_name: string;
-}
+// type GoogleData = {
+//   email: string;
+//   first_name: string;
+//   last_name: string;
+// }
 
 enum ActionType {
   INITIALIZE = 'INITIALIZE',
@@ -170,7 +170,7 @@ export const AuthContext = createContext<AuthContextValue>({
   ...initialState,
   platform: 'JWT',
   login: () => Promise.resolve(),
-  loginMS: () => Promise.resolve(),
+  // loginMS: () => Promise.resolve(),
   loginGoogle: () => Promise.resolve(),
   logout: () => Promise.resolve(),
   register: () => Promise.resolve(),
@@ -223,32 +223,38 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
-    const { accessToken } = await authApi.login({ email, password });
-    const user = await authApi.me({ accessToken });
 
-    localStorage.setItem('accessToken', accessToken);
+    try {
+      const { accessToken } = await authApi.login({ email, password });
+      const user = await authApi.me({ accessToken });
+  
+      localStorage.setItem('accessToken', accessToken);
+  
+      dispatch({
+        type: ActionType.LOGIN,
+        payload: {
+          user
+        }
+      });
+    } catch(err) {
+      console.error(err);
+    }
 
-    dispatch({
-      type: ActionType.LOGIN,
-      payload: {
-        user
-      }
-    });
   };
 
-  const loginMS = async (): Promise<void> => {
-    const { accessToken } = await authApi.loginMS();
-    const user = await authApi.me({ accessToken });
+  // const loginMS = async (): Promise<void> => {
+  //   const { accessToken } = await authApi.loginMS();
+  //   const user = await authApi.me({ accessToken });
 
-    localStorage.setItem('accessToken', accessToken);
+  //   localStorage.setItem('accessToken', accessToken);
 
-    dispatch({
-      type: ActionType.LOGIN,
-      payload: {
-        user
-      }
-    });
-  };
+  //   dispatch({
+  //     type: ActionType.LOGIN,
+  //     payload: {
+  //       user
+  //     }
+  //   });
+  // };
 
   const loginGoogle = async (): Promise<void> => {
 
@@ -289,16 +295,45 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
     });
   };
 
-  const updateUser = async (): Promise<void> => {
+  const updateUser = async (email: string, first_name: string, last_name: string): Promise<void> => {
 
+    const user = await usersApi.updateUser({
+      "email": email,
+      "first_name": first_name,
+      "last_name": last_name
+    });
+
+
+    dispatch({
+      type: ActionType.UPDATE_USER,
+      payload: {
+        user
+      }
+    });
   }
 
-  const updateUserAvatar = async (): Promise<void> => {
-    
+  const updateUserAvatar = async (avatar: string): Promise<void> => {
+
+    const user = await usersApi.updateUserAvatar({
+      "avatar" : avatar
+    });
+
+    const newAvatar = user.avatar;
+
+    dispatch({
+      type: ActionType.UPDATE_USER_AVATAR,
+      payload: {
+        "avatar" : newAvatar
+      }
+    });
   }
 
   const deleteUser = async (): Promise<void> => {
-    
+    await usersApi.deleteUser();
+    localStorage.removeItem('accessToken');
+    dispatch({
+      type: ActionType.DELETE_USER
+    });
   }
 
   return (
@@ -309,7 +344,7 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
         login,
         logout,
         register,
-        loginMS,
+        // loginMS,
         loginGoogle,
         updateUser,
         updateUserAvatar,

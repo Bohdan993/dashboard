@@ -1,11 +1,11 @@
-import type { FC, MouseEvent } from 'react';
-import { useState } from 'react';
+import type { FC, MouseEvent, ChangeEvent } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import NextLink from 'next/link';
 import toast from 'react-hot-toast';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
-import { useDispatch } from '../../../store';
+import type { User } from '../../../types/user';
 import {
   Avatar,
   Box,
@@ -17,25 +17,31 @@ import {
   Typography
 } from '@mui/material';
 import { UserCircle as UserCircleIcon } from '../../../icons/user-circle';
-import { updateUser } from '../../../thunks/user';
+import { DeleteConfirmationDialog } from '../../../components/dashboard/delete-confirmation-dialog'
 
-export const ProfileGeneralSettings: FC = (props) => {
 
-  const dispatch = useDispatch();
+interface ProfileGeneralSettingsProps {
+  auth: {
+    user: User;
+    updateUser: (email: string, first_name: string, last_name: string) => Promise<void>;
+    updateUserAvatar: (avatar: string) => Promise<void>;
+    deleteUser: () => Promise<void>;
+  };
+}
+
+export const ProfileGeneralSettings: FC<ProfileGeneralSettingsProps> = (props) => {
+  const {auth , ...rest} = props;
   const router = useRouter();
   const [show, setShow] = useState<boolean>(false);
-  // To get the user from the authContext, you can use
-  // `const { user } = useAuth();`
-  const user = {
-    avatar: '/static/mock-images/avatars/avatar-anika_visser.png',
-    name: 'Anika Visser'
-  };
+  const { user, updateUser, updateUserAvatar, deleteUser } = auth;
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const formik = useFormik({
     initialValues: {
-      email: '',
-      first_name: '',
-      last_name: '',
+      email: user?.email || '',
+      first_name: user?.first_name || '',
+      last_name: user?.last_name || '',
       submit: null
     },
     validationSchema: Yup.object({
@@ -45,11 +51,7 @@ export const ProfileGeneralSettings: FC = (props) => {
     }),
     onSubmit: async (values, helpers): Promise<void> => {
       try {
-        await dispatch(updateUser({
-            "email": values.email, 
-            "first_name": values.first_name, 
-            "last_name": values.last_name
-        }))
+        await updateUser(values.email, values.first_name, values.last_name);
         toast.success('Profile updated!');
         router.push('/dashboard').catch(console.error);
         
@@ -68,10 +70,43 @@ export const ProfileGeneralSettings: FC = (props) => {
       setShow(true);
   }
 
+  const handleConfirm = async (event: MouseEvent<HTMLButtonElement>): Promise<void>  => {
+    try {
+      await deleteUser();
+      toast.success('User deleted!');
+    } catch(err) {
+      console.error(err);
+      toast.error('Something went wrong!');
+    }
+  }
+
+  const handleCancel = (event: MouseEvent<HTMLButtonElement>): void  => {
+  }
+
+  const handleUpdateUserAvatar = async(event: MouseEvent<HTMLButtonElement>) : Promise<void> => {
+    try {
+      await updateUserAvatar(selectedImage! as unknown as string);
+      setSelectedImage(null);
+      toast.success('User avatar updated!');
+    } catch(err) {
+      console.error(err);
+      toast.error('Something went wrong!');
+    }
+  }
+
+  const handleUpload = () : void => {
+    inputRef.current!.click();
+  }
+
+  const handleChange = (event : ChangeEvent<HTMLInputElement>) => {
+    setSelectedImage(event.target.files?.[0]!);
+  }
+
   return (
+    <>
     <form
       onSubmit={formik.handleSubmit}
-      {...props}
+      {...rest}
     >
       <Box
         sx={{ mt: 4 }}
@@ -102,8 +137,17 @@ export const ProfileGeneralSettings: FC = (props) => {
                     display: 'flex'
                   }}
                 >
+                  <input
+                    ref={inputRef}
+                    type="file"
+                    accept='image/*'
+                    name="myImage"
+                    style={{display: 'none'}}
+                    onChange={handleChange}
+                  />
                   <Avatar
-                    src={user.avatar}
+                    src={selectedImage ? URL.createObjectURL(selectedImage as unknown as Blob) : user?.avatar}
+                    onClick={handleUpload}
                     sx={{
                       height: 64,
                       mr: 2,
@@ -112,6 +156,13 @@ export const ProfileGeneralSettings: FC = (props) => {
                   >
                     <UserCircleIcon fontSize="small" />
                   </Avatar>
+
+                  <Button
+                    disabled={!selectedImage}
+                    onClick={handleUpdateUserAvatar}
+                  >
+                    Update Avatar
+                  </Button>
                 </Box>
                 <Box
                   sx={{
@@ -122,8 +173,13 @@ export const ProfileGeneralSettings: FC = (props) => {
                 >
                   <TextField
                     label="Email Address"
+                    error={Boolean(formik.touched.email && formik.errors.email)}
+                    helperText={formik.touched.email && formik.errors.email}
                     required
+                    name="email"
                     size="small"
+                    onBlur={formik.handleBlur}
+                    onChange={formik.handleChange}
                     sx={{
                       flexGrow: 1,
                       mr: 3,
@@ -131,6 +187,7 @@ export const ProfileGeneralSettings: FC = (props) => {
                         borderStyle: 'dashed'
                       }
                     }}
+                    value={formik.values.email}
                   />
                 </Box>
                 <Box
@@ -227,5 +284,14 @@ export const ProfileGeneralSettings: FC = (props) => {
           </Box>
       </Box>
     </form>
+    <DeleteConfirmationDialog
+        id={user?.id}
+        subject={'user'}
+        onConfirmHandler={(event) => handleConfirm(event)}
+        onCancelHandler={handleCancel}
+        show={show}
+        setShow={setShow}
+    />
+    </>
   );
 };
