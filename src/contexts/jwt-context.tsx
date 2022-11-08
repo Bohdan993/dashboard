@@ -256,9 +256,9 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
   //   });
   // };
 
-  const loginGoogle = async (): Promise<void> => {
+  const loginGoogle = async (code: string): Promise<void> => {
 
-    const { accessToken } = await authApi.loginGoogle();
+    const { accessToken } = await authApi.loginGoogle(code);
     const user = await authApi.me({ accessToken });
 
     localStorage.setItem('accessToken', accessToken);

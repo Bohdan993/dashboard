@@ -142,13 +142,12 @@ class AuthApi {
 
   };
 
-  async loginGoogle(): LoginResponse {
-
+  async loginGoogle(code: string): LoginResponse {
 
     return new Promise(async (resolve, reject) => {
       try {
 
-        const res = await fetch(`${baseUrl}/auth/google`, {
+        const res = await fetch(`${baseUrl}/auth/login-google?code=${code}`, {
           method: "GET",
           headers: {
             'accept': 'application/json'

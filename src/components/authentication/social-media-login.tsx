@@ -22,7 +22,7 @@ export const SocialMediaLogin: FC = (props) => {
   const { loginMS, loginGoogle } = useAuth();
 
   const login = useGoogleLogin({
-    onSuccess: codeResponse => loginGoogle(codeResponse),
+    onSuccess: codeResponse => loginGoogle(codeResponse?.code),
     flow: 'auth-code',
   });
 
@@ -83,7 +83,7 @@ export const SocialMediaLogin: FC = (props) => {
           type="button"
           variant="text"
           sx={{mr: 2}}
-          onClick={(e) => onClick('google', e)}
+          onClick={login}
         >
           <GoogleIcon/>
         </Button>
