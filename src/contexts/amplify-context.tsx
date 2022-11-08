@@ -139,7 +139,10 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
               avatar: '/static/mock-images/avatars/avatar-anika_visser.png',
               email: user.attributes.email,
               name: 'Anika Visser',
-              plan: 'Premium'
+              plan: 'Premium',
+              first_name: 'Anika Visser',
+              last_name: 'Anika Visser',
+              is_email_verif: false
             }
           }
         });
@@ -173,7 +176,10 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
           avatar: '/static/mock-images/avatars/avatar-anika_visser.png',
           email: user.attributes.email,
           name: 'Anika Visser',
-          plan: 'Premium'
+          plan: 'Premium',
+          first_name: '',
+          last_name: '',
+          is_email_verif: false
         }
       }
     });

@@ -93,11 +93,14 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
         payload: {
           isAuthenticated: true,
           user: {
-            id: user.uid,
-            avatar: user.photoURL || undefined,
+            id: user.uid as unknown as number,
+            avatar: user.photoURL || '',
             email: user.email || 'anika.visser@devias.io',
             name: 'Anika Visser',
-            plan: 'Premium'
+            plan: 'Premium',
+            first_name: '',
+            last_name: '',
+            is_email_verif: false
           }
         }
       });

@@ -87,7 +87,7 @@ class AuthApi {
 
         user = {
           id: createResourceId(),
-          avatar: undefined,
+          avatar: '',
           email,
           name,
           password,
