@@ -224,7 +224,7 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   const login = async (email: string, password: string): Promise<void> => {
 
-    try {
+
       const { accessToken } = await authApi.login({ email, password });
       const user = await authApi.me({ accessToken });
   
@@ -236,9 +236,7 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
           user
         }
       });
-    } catch(err) {
-      console.error(err);
-    }
+
 
   };
 

@@ -61,7 +61,8 @@ class AuthApi {
 
         if(!res.ok && res.status!==200)
         {
-           throw new Error(String(res.status));
+          const err = await res.json();
+          throw new Error(String(err?.detail));
         }
 
         const data: TokenData = await res.json();
@@ -73,14 +74,8 @@ class AuthApi {
 
         resolve({ accessToken: data.access_token });
       } catch (err) {
-        if(err?.message == 401) {
-            console.error('[Auth Api]: ', err);
-            reject(new Error('Логін та/або пароль введено не вірно.'));
-        } 
-        else {
-            console.error('[Auth Api]: ', err);
-            reject(new Error('Internal server error'));
-        } 
+        console.error('[Auth Api]: ', err);
+        reject(new Error(err?.message));
       }
     });
   }

@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
-import { Alert, Box, Button, FormHelperText, TextField } from '@mui/material';
+import { Box, Button, FormHelperText, TextField } from '@mui/material';
 import { useAuth } from '../../hooks/use-auth';
 import { useMounted } from '../../hooks/use-mounted';
 
@@ -37,7 +37,6 @@ export const JWTLogin: FC = (props) => {
         }
       } catch (err) {
         console.error(err);
-
         if (isMounted()) {
           helpers.setStatus({ success: false });
           helpers.setErrors({ submit: err.message });
