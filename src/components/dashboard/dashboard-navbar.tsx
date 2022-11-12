@@ -6,25 +6,19 @@ import type { AppBarProps } from '@mui/material';
 import {
   AppBar,
   Avatar,
-  Badge,
   Box,
   ButtonBase,
   IconButton,
   Toolbar,
-  Tooltip
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Menu as MenuIcon } from '../../icons/menu';
-import { Bell as BellIcon } from '../../icons/bell';
-import { Search as SearchIcon } from '../../icons/search';
 import { UserCircle as UserCircleIcon } from '../../icons/user-circle';
-import { Users as UsersIcon } from '../../icons/users';
 import { AccountPopover } from './account-popover';
-import { ContactsPopover } from './contacts-popover';
-import { ContentSearchDialog } from './content-search-dialog';
-import { NotificationsPopover } from './notifications-popover';
 import { LanguagePopover } from './language-popover';
 import { useAuth } from '../../hooks/use-auth';
+
+const baseUrl: string = 'https://my.platops.cloud/';
 
 interface DashboardNavbarProps extends AppBarProps {
   onOpenSidebar?: () => void;
@@ -134,7 +128,7 @@ const AccountButton = () => {
             height: 40,
             width: 40
           }}
-          src={user?.avatar}
+          src={`${baseUrl}${user?.avatar}`}
         >
           <UserCircleIcon fontSize="small" />
         </Avatar>

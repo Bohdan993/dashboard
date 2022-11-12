@@ -5,11 +5,15 @@ import { useFormik } from 'formik';
 import { Box, Button, FormHelperText, TextField } from '@mui/material';
 import { useAuth } from '../../hooks/use-auth';
 import { useMounted } from '../../hooks/use-mounted';
+import { useDispatch, useSelector } from '../../store';
+import { getLoginLoading, getAuthMethod } from '../../thunks/app';
 
 export const JWTLogin: FC = (props) => {
+  const dispatch = useDispatch();
   const isMounted = useMounted();
   const router = useRouter();
   const { login } = useAuth();
+  const { isLoginLoading } = useSelector((state) => state.app);
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -29,15 +33,22 @@ export const JWTLogin: FC = (props) => {
     }),
     onSubmit: async (values, helpers): Promise<void> => {
       try {
+        dispatch(getLoginLoading({isLoginLoading: true}));
         await login(values.email, values.password);
 
         if (isMounted()) {
+          dispatch(getAuthMethod({
+            auth: {
+              authMethod: 'email'
+            }
+          }));
           const returnUrl = (router.query.returnUrl as string | undefined) || '/dashboard';
           router.push(returnUrl).catch(console.error);
         }
       } catch (err) {
         console.error(err);
         if (isMounted()) {
+          dispatch(getLoginLoading({isLoginLoading: false}));
           helpers.setStatus({ success: false });
           helpers.setErrors({ submit: err.message });
           helpers.setSubmitting(false);
@@ -87,7 +98,7 @@ export const JWTLogin: FC = (props) => {
       )}
       <Box sx={{ mt: 2 }}>
         <Button
-          disabled={formik.isSubmitting}
+          disabled={isLoginLoading}
           fullWidth
           size="large"
           type="submit"

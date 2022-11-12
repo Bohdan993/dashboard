@@ -20,6 +20,8 @@ import { UserCircle as UserCircleIcon } from '../../../icons/user-circle';
 import { DeleteConfirmationDialog } from '../../../components/dashboard/delete-confirmation-dialog'
 
 
+const baseUrl: string = 'https://my.platops.cloud/';
+
 interface ProfileGeneralSettingsProps {
   auth: {
     user: User;
@@ -36,6 +38,8 @@ export const ProfileGeneralSettings: FC<ProfileGeneralSettingsProps> = (props) =
   const { user, updateUser, updateUserAvatar, deleteUser } = auth;
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  console.log(user);
 
   const formik = useFormik({
     initialValues: {
@@ -146,7 +150,7 @@ export const ProfileGeneralSettings: FC<ProfileGeneralSettingsProps> = (props) =
                     onChange={handleChange}
                   />
                   <Avatar
-                    src={selectedImage ? URL.createObjectURL(selectedImage as unknown as Blob) : user?.avatar}
+                    src={selectedImage ? URL.createObjectURL(selectedImage as unknown as Blob) : `${baseUrl}${user?.avatar}`}
                     onClick={handleUpload}
                     sx={{
                       height: 64,
@@ -285,7 +289,7 @@ export const ProfileGeneralSettings: FC<ProfileGeneralSettingsProps> = (props) =
       </Box>
     </form>
     <DeleteConfirmationDialog
-        id={user?.id}
+        id={user.id}
         subject={'user'}
         onConfirmHandler={(event) => handleConfirm(event)}
         onCancelHandler={handleCancel}

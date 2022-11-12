@@ -16,8 +16,10 @@ import {
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../hooks/use-auth';
 import { logout as reduxLogout } from '../../thunks/company';
-import { useDispatch } from '../../store';
+import { useDispatch, useSelector } from '../../store';
 import { UserCircle as UserCircleIcon } from '../../icons/user-circle';
+
+const baseUrl: string = 'https://my.platops.cloud/';
 
 interface AccountPopoverProps {
   anchorEl: null | Element;
@@ -30,12 +32,30 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
   const router = useRouter();
   const { logout, user } = useAuth();
   const dispatch = useDispatch();
+  const { auth } = useSelector((state) => state.app);
 
-  const handleLogout = async (): Promise<void> => {
+  const handleLogout = () : void => {
     try {
       onClose?.();
-      await logout();
-      router.push('/').then(()=>dispatch(reduxLogout())).catch(console.error);
+      router.push('/').then(async () => {
+        await logout();
+        dispatch(reduxLogout());
+        switch(auth.authMethod){
+          case 'google' : {
+
+            break;
+          }
+          case 'microsoft' : {
+            auth?.authInstance?.logout();
+            break;
+          }
+          case 'email' : {
+
+            break;
+          }
+          default: break;
+        }
+      }).catch(console.error);
     } catch (err) {
       console.error(err);
       toast.error('Unable to logout.');
@@ -64,7 +84,7 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
         }}
       >
         <Avatar
-          src={user?.avatar}
+          src={`${baseUrl}${user?.avatar}`}
           sx={{
             height: 40,
             width: 40

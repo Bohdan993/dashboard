@@ -46,7 +46,7 @@ export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
       email: Yup.string().email("Invalid email format").max(255).required(),
       phone_num: Yup.string().max(255).required(),
       address_1: Yup.string().max(255).required(),
-      address_2: Yup.string().max(255).required(),
+      address_2: Yup.string().max(255),
       city: Yup.string().max(255).required(),
       state: Yup.string().max(255).required(),
       country: Yup.string().max(255).required(),

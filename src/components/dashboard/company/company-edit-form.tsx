@@ -48,7 +48,7 @@ export const CompanyEditForm: FC<CompanyEditFormProps> = (props) => {
     validationSchema: Yup.object({
       company_name: Yup.string().max(255).required(),
       address_1: Yup.string().max(255).required(),
-      address_2: Yup.string().max(255).required(),
+      address_2: Yup.string().max(255),
       city: Yup.string().max(255).required(),
       state: Yup.string().max(255).required(),
       country: Yup.string().max(255).required(),
