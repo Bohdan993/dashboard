@@ -1,7 +1,7 @@
 import type { User } from '../types/user';
 
 
-const baseUrl:string = "http://api.platops.cloud:8001";
+const baseUrl:string = "https://my.platops.cloud";
 
 type GoogleData = {
   email: string;
@@ -142,7 +142,7 @@ class AuthApi {
     return new Promise(async (resolve, reject) => {
       try {
 
-        const res = await fetch(`${baseUrl}/auth/login-google?code=${code}`, {
+        const res = await fetch(`${baseUrl}/auth/google-callback?code=${code}`, {
           method: "GET",
           headers: {
             'accept': 'application/json'

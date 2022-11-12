@@ -15,9 +15,9 @@ import {
 } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../hooks/use-auth';
-import { Cog as CogIcon } from '../../icons/cog';
+import { logout as reduxLogout } from '../../thunks/company';
+import { useDispatch } from '../../store';
 import { UserCircle as UserCircleIcon } from '../../icons/user-circle';
-import { SwitchHorizontalOutlined as SwitchHorizontalOutlinedIcon } from '../../icons/switch-horizontal-outlined';
 
 interface AccountPopoverProps {
   anchorEl: null | Element;
@@ -29,18 +29,13 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
   const { anchorEl, onClose, open, ...other } = props;
   const router = useRouter();
   const { logout, user } = useAuth();
-  // To get the user from the authContext, you can use
-  // `const { user } = useAuth();`
-  // const user = {
-  //   avatar: '/static/mock-images/avatars/avatar-anika_visser.png',
-  //   name: 'Anika Visser'
-  // };
-  console.log(user);
+  const dispatch = useDispatch();
+
   const handleLogout = async (): Promise<void> => {
     try {
       onClose?.();
       await logout();
-      router.push('/').catch(console.error);
+      router.push('/').then(()=>dispatch(reduxLogout())).catch(console.error);
     } catch (err) {
       console.error(err);
       toast.error('Unable to logout.');
@@ -85,12 +80,6 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
           <Typography variant="body1">
             {user?.first_name} {user?.last_name}
           </Typography>
-          {/* <Typography
-            color="textSecondary"
-            variant="body2"
-          >
-            Acme Inc
-          </Typography> */}
         </Box>
       </Box>
       <Divider />
@@ -112,40 +101,6 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
             />
           </MenuItem>
         </NextLink>
-        {/* <NextLink
-          href="/dashboard/account"
-          passHref
-        >
-          <MenuItem component="a">
-            <ListItemIcon>
-              <CogIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary={(
-                <Typography variant="body1">
-                  Settings
-                </Typography>
-              )}
-            />
-          </MenuItem>
-        </NextLink>
-        <NextLink
-          href="/dashboard"
-          passHref
-        >
-          <MenuItem component="a">
-            <ListItemIcon>
-              <SwitchHorizontalOutlinedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText
-              primary={(
-                <Typography variant="body1">
-                  Change organization
-                </Typography>
-              )}
-            />
-          </MenuItem>
-        </NextLink> */}
         <Divider />
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>

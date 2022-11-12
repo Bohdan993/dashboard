@@ -1,61 +1,57 @@
 import type { FC } from 'react';
-import { useEffect } from 'react';
+import { useState } from 'react';
+import { AuthError, UserAgentApplication } from "msal";
 import { useRouter } from 'next/router';
-import { Box, Button, FormHelperText, TextField } from '@mui/material';
+import { Box, Button} from '@mui/material';
 import { useAuth } from '../../hooks/use-auth';
 import { useMounted } from '../../hooks/use-mounted';
 import { Google as GoogleIcon } from '../../icons/google';
 import { Microsoft as MicrosoftIcon } from '../../icons/microsoft';
 import { useGoogleLogin } from '@react-oauth/google';
+import MicrosoftLogin from "react-microsoft-login";
 
-
-
-type GoogleData = {
-  email: string;
-  first_name: string;
-  last_name: string;
-}
 
 export const SocialMediaLogin: FC = (props) => {
   const isMounted = useMounted();
   const router = useRouter();
   const { loginMS, loginGoogle } = useAuth();
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
   const login = useGoogleLogin({
-    onSuccess: codeResponse => loginGoogle(codeResponse?.code),
-    flow: 'auth-code',
-  });
-
-  const onClick = async (type: 'microsoft' | 'google', e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
-    try {
-        if(type === 'google') {
-            await loginGoogle();
-        } else {
-            await loginMS();
-        }
-
+    onSuccess: async codeResponse => {
+      try {
+        setLoggedIn(true);
+        await loginGoogle(codeResponse?.code);
         if (isMounted()) {
             const returnUrl = (router.query.returnUrl as string | undefined) || '/dashboard';
             router.push(returnUrl).catch(console.error);
         }
+      } catch(err) {
+        setLoggedIn(false);
+        console.error(err);
+      }
+
+    },
+    flow: 'auth-code'
+  });
+
+  const login2 = async (err: AuthError | null, data: any, msal: UserAgentApplication | undefined): Promise<void> =>  {
+    try {
+      setLoggedIn(true);
+      console.log(data, err);
+      if(err) { throw err };
+      await loginMS(data);
+      if (isMounted()) {
+          const returnUrl = (router.query.returnUrl as string | undefined) || '/dashboard';
+          router.push(returnUrl).catch(console.error);
+      }
+
     } catch(err) {
+      setLoggedIn(false);
       console.error(err);
     }
-  }
+  };
 
-  
-  const onGoogleLoginFailure = (response: any) => {
-    console.log(response);
-  }
-
-  // useEffect(() => {
-  //   function start() {
-  //     gapi.auth2.init({
-  //       client_id: "1030243889898-4e6dm149nqvst7ru154gmbfh05sc4c6f.apps.googleusercontent.com"
-  //     })
-  //   }
-  //   gapi.load('auth2', start)
-  // }, [])
 
   return (
     <div
@@ -67,18 +63,8 @@ export const SocialMediaLogin: FC = (props) => {
             flexDirection: 'row',
             justifyContent: 'center'
         }}>
-        {/* <GoogleLogin
-            clientId="1030243889898-4e6dm149nqvst7ru154gmbfh05sc4c6f.apps.googleusercontent.com"
-            render={renderProps => (
-
-            )}
-            buttonText="Login"
-            onSuccess={loginGoogle}
-            onFailure={onGoogleLoginFailure}
-            cookiePolicy={'single_host_origin'}
-        /> */}
         <Button
-          disabled={false}
+          disabled={loggedIn}
           size="small"
           type="button"
           variant="text"
@@ -87,15 +73,20 @@ export const SocialMediaLogin: FC = (props) => {
         >
           <GoogleIcon/>
         </Button>
-        <Button
-          disabled={false}
-          size="small"
-          type="button"
-          variant="text"
-          onClick={(e)=>onClick('microsoft', e)}
-        >
-          <MicrosoftIcon/>
-        </Button>
+        <MicrosoftLogin 
+          clientId={'507dbab6-053a-4025-abb5-02f5df7e04cb'} 
+          authCallback={login2}
+          redirectUri={'https://localhost:8001/auth/azure-callback'}
+          children={ 
+          <Button
+            disabled={loggedIn}
+            size="small"
+            type="button"
+            variant="text"
+          >
+            <MicrosoftIcon/>
+          </Button>}
+        />
       </Box>
     </div>
   );

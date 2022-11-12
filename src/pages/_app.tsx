@@ -48,7 +48,7 @@ const App: FC<EnhancedAppProps> = (props) => {
 
   return (
     <CacheProvider value={emotionCache}>
-      <GoogleOAuthProvider clientId="1030243889898-4e6dm149nqvst7ru154gmbfh05sc4c6f.apps.googleusercontent.com">
+      <GoogleOAuthProvider clientId="1030243889898-hrnjodjh8v8l7e82uk87cfcefveco8r9.apps.googleusercontent.com">
       <Head>
         <title>
           Material Kit Pro

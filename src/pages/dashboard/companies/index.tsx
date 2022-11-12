@@ -1,5 +1,6 @@
 import type { ChangeEvent, MouseEvent } from 'react';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { useAuth } from '../../../hooks/use-auth';
 import type { NextPage } from 'next';
 import NextLink from 'next/link';
 import Head from 'next/head';
@@ -45,31 +46,6 @@ interface SortOption {
   value: Sort;
 }
 
-// type TabValue = 'all' | 'hasAcceptedMarketing' | 'isProspect' | 'isReturning';
-
-// interface Tab {
-//   label: string;
-//   value: TabValue;
-// }
-
-// const tabs: Tab[] = [
-//   {
-//     label: 'All',
-//     value: 'all'
-//   },
-//   {
-//     label: 'Accepts Marketing',
-//     value: 'hasAcceptedMarketing'
-//   },
-//   {
-//     label: 'Prospect',
-//     value: 'isProspect'
-//   },
-//   {
-//     label: 'Returning',
-//     value: 'isReturning'
-//   }
-// ];
 
 const sortOptions: SortOption[] = [
   {
@@ -108,18 +84,6 @@ const applyFilters = (
       return false;
     }
   }
-
-  // if (filters.hasAcceptedMarketing && !company.hasAcceptedMarketing) {
-  //   return false;
-  // }
-
-  // if (filters.isProspect && !company.isProspect) {
-  //   return false;
-  // }
-
-  // if (filters.isReturning && !company.isReturning) {
-  //   return false;
-  // }
 
   return true;
 });
@@ -175,21 +139,13 @@ const CompaniesList: NextPage = () => {
   const isMounted = useMounted();
   const queryRef = useRef<HTMLInputElement | null>(null);
   const { companies } = useSelector((state) => state.company);
-  // const [currentTab, setCurrentTab] = useState<TabValue>('all');
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [sort, setSort] = useState<Sort>(sortOptions[0].value);
   const [filters, setFilters] = useState<Filters>({
     query: ''
-    // hasAcceptedMarketing: undefined,
-    // isProspect: undefined,
-    // isReturning: undefined
   });
   const dispatch = useDispatch();
-
-  // useEffect(() => {
-  //   gtm.push({ event: 'page_view' });
-  // }, []);
 
   const getCompanies = useCallback(async () => {
     try {
@@ -213,22 +169,6 @@ const CompaniesList: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [companies]
   );
-
-  // const handleTabsChange = (event: ChangeEvent<{}>, value: TabValue): void => {
-  //   const updatedFilters: Filters = {
-  //     ...filters,
-  //     hasAcceptedMarketing: undefined,
-  //     isProspect: undefined,
-  //     isReturning: undefined
-  //   };
-
-  //   if (value !== 'all') {
-  //     updatedFilters[value] = true;
-  //   }
-
-  //   setFilters(updatedFilters);
-  //   setCurrentTab(value);
-  // };
 
   const handleQueryChange = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();

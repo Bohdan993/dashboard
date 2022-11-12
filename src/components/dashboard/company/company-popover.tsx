@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { MenuItem, Popover } from '@mui/material';
 import { useMounted } from '../../../hooks/use-mounted';
 import { useDispatch, useSelector } from '../../../store';
@@ -12,10 +12,6 @@ interface CompanyPopoverProps {
   open?: boolean;
 }
 
-// const companys = [
-//   'Acme Inc',
-//   'Division Inc'
-// ];
 
 export const CompanyPopover: FC<CompanyPopoverProps> = (props) => {
   const { anchorEl, onClose, open, ...other } = props;
@@ -44,8 +40,7 @@ export const CompanyPopover: FC<CompanyPopoverProps> = (props) => {
             getCompanies();
         }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [companies]
   );
 
   useEffect(() => {
@@ -68,7 +63,7 @@ export const CompanyPopover: FC<CompanyPopoverProps> = (props) => {
       transitionDuration={0}
       {...other}
     >
-      {companies.map((company) => (
+      {companies.map((company: Company) => (
         <MenuItem
           key={company.id}
           onClick={() => handleChange(company)}

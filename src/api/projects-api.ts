@@ -1,6 +1,6 @@
 import type { Project } from '../types/project';
 
-const baseUrl:string = "http://api.platops.cloud:8001";
+const baseUrl:string = "https://my.platops.cloud";
 
 type RegisterResponse = Promise<{
   accessToken: string;

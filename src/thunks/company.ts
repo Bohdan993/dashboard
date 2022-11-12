@@ -41,4 +41,9 @@ export const deleteCompany = (params: DeleteCompanyParams): AppThunk => async (d
 
   dispatch(slice.actions.deleteCompany(params.companyId));
 }
+
+
+export const logout = (): AppThunk => (dispatch) : void => {
+  dispatch(slice.actions.logout());
+}
  

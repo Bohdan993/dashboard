@@ -1,6 +1,6 @@
 import type { Company } from '../types/company';
 
-const baseUrl:string = "http://api.platops.cloud:8001";
+const baseUrl:string = "https://my.platops.cloud";
 
 type GetCompaniesResponse = Promise<Company[]>;
 

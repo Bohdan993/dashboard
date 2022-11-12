@@ -53,6 +53,11 @@ export const slice = createSlice({
       action: PayloadAction<number>
     ): void {
       state.companies = state.companies.filter((company) => company.id !== action.payload);
+    },
+    logout: state => {
+      // From here we can take action only at this "company" state
+      // But, as we have taken care of this particular "logout" action
+      // in rootReducer, we can use it to CLEAR the complete Redux Store's state
     }
   }
 });

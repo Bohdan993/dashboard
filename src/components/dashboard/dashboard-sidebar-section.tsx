@@ -48,7 +48,6 @@ const reduceChildRoutes = ({
   path: string;
 }): Array<JSX.Element> => {
   const key = `${item.title}-${depth}`;
-  console.log('Path: ', item.path, 'Path2: ', path);
   const partialMatch = item.path ? path.includes(item.path) : false;
   const exactMatch = path.split('?')[0] === item.path; // We don't compare query params
 

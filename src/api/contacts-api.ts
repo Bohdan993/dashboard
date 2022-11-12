@@ -1,6 +1,6 @@
 import type { Contact } from '../types/contact';
 
-const baseUrl:string = "http://api.platops.cloud:8001";
+const baseUrl:string = "https://my.platops.cloud";
 
 type GetContactsResponse = Promise<Contact[]>;
 
