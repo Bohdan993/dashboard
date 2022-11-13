@@ -92,6 +92,7 @@ export const SocialMediaLogin: FC = (props) => {
           clientId={'507dbab6-053a-4025-abb5-02f5df7e04cb'} 
           authCallback={login2}
           redirectUri={`https://localhost:8001/auth/azure-callback`}
+          // @ts-ignore
           children={ 
           <Button
             disabled={isLoginLoading}
