@@ -1,5 +1,4 @@
 import type { FC } from 'react';
-import { useState } from 'react';
 import { useRouter } from 'next/router';
 import NextLink from 'next/link';
 import toast from 'react-hot-toast';
@@ -12,11 +11,22 @@ import {
   CardContent,
   Grid,
   TextField,
-  Typography
+  Typography,
+  Autocomplete,
 } from '@mui/material';
 import { useDispatch } from '../../../store';
 import { createContact } from '../../../thunks/contact';
-import { MobileDatePicker } from '@mui/x-date-pickers';
+
+type Option = {
+  text: string;
+  value: string;
+};
+
+const types: Option[] = [
+  { text: 'Administrative', value: 'administrative' },
+  { text: 'Billing', value: 'billing' },
+  { text: 'Technical', value: 'technical' }
+];
 
 interface ContactCreateFormProps  {
   company_id: number;
@@ -28,7 +38,7 @@ export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
   const router = useRouter();
   const formik = useFormik({
     initialValues: {
-      type: '',
+      type: { text: '', value: '' },
       name: '',
       email: '',
       phone_num: '',
@@ -41,7 +51,10 @@ export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
       submit: null
     },
     validationSchema: Yup.object({
-      type: Yup.string().max(255).required(),
+      type: Yup.object({
+        value:  Yup.string().max(255).required('Type is a required field'),
+        text:  Yup.string().max(255).required()
+      }),
       name: Yup.string().max(255).required(),
       email: Yup.string().email("Invalid email format").max(255).required(),
       phone_num: Yup.string().max(255).required(),
@@ -53,9 +66,10 @@ export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
       zip: Yup.string().max(255).required()
     }),
     onSubmit: async (values, helpers): Promise<void> => {
+      
       try {
         await dispatch(createContact({"contact" : {
-            "type": values.type,
+            "type": values.type.value,
             "name": values.name,
             "email": values.email,
             "phone_num": values.phone_num,
@@ -78,6 +92,8 @@ export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
       }
     },
   });
+
+  console.log(formik);
 
   return (
     <form
@@ -104,15 +120,26 @@ export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
               md={8}
               xs={12}
             >
-            <TextField
-              error={Boolean(formik.touched.type && formik.errors.type)}
-              fullWidth
-              helperText={formik.touched.type && formik.errors.type}
-              label="Type"
-              name="type"
-              onBlur={formik.handleBlur}
-              onChange={formik.handleChange}
+            <Autocomplete
+              getOptionLabel={(option: Option) => option.text}
+              options={types}
+              isOptionEqualToValue={(option: Option, value: Option) => option.value === value.value}
               value={formik.values.type}
+              onChange={(e, value) => {
+                formik.setFieldValue(
+                  "type",
+                  value !== null ? value : formik.initialValues.type
+                );
+              }}
+              renderInput={(params): JSX.Element => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  label="Type"
+                  helperText={formik.touched.type && formik.errors.type?.value}
+                  error={Boolean(formik.touched.type && formik.errors.type)}
+                />
+              )}
             />
             <TextField
               error={Boolean(formik.touched.name && formik.errors.name)}

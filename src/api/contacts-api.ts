@@ -138,7 +138,7 @@ class ContactsApi {
 
         return new Promise(async (resolve, reject) => {
             try {
-                const res = await fetch(`${baseUrl}/contacts/${contact_id}?company_id=${company_id}`, {
+                const res = await fetch(`${baseUrl}/contacts/update${contact_id}?company_id=${company_id}`, {
                 method: "PUT",
                 headers: {
                     'Content-Type': 'application/json',

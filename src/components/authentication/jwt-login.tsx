@@ -65,7 +65,6 @@ export const JWTLogin: FC = (props) => {
       {...props}
     >
       <TextField
-        autoFocus
         error={Boolean(formik.touched.email && formik.errors.email)}
         fullWidth
         helperText={formik.touched.email && formik.errors.email}

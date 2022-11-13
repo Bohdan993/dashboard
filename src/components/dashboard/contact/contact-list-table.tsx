@@ -125,7 +125,7 @@ export const ContactListTable: FC<ContactListTableProps> = (props) => {
                   key={contact.id}
                 >
                   <TableCell>
-                    {`${contact.type}`}
+                    {`${(contact.type.charAt(0).toUpperCase() +  contact.type.substr(1))}`}
                   </TableCell>
                   <TableCell>
                     <Box

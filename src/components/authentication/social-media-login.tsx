@@ -1,5 +1,4 @@
 import type { FC } from 'react';
-import { useState } from 'react';
 import { AuthError, UserAgentApplication } from "msal";
 import { useRouter } from 'next/router';
 import { Box, Button} from '@mui/material';
@@ -82,10 +81,10 @@ export const SocialMediaLogin: FC = (props) => {
         <Button
           disabled={isLoginLoading}
           size="small"
-          type="button"
           variant="text"
           sx={{mr: 2}}
           onClick={login}
+          href="#"
         >
           <GoogleIcon/>
         </Button>
@@ -97,8 +96,8 @@ export const SocialMediaLogin: FC = (props) => {
           <Button
             disabled={isLoginLoading}
             size="small"
-            type="button"
             variant="text"
+            href="#"
           >
             <MicrosoftIcon/>
           </Button>}

@@ -15,7 +15,7 @@ export interface AuthContextValue extends State {
   platform: 'JWT';
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  // loginMS: () => Promise<void>;
+  // loginMS: (response: any) => Promise<void>;
   loginGoogle: (response: any) => Promise<void>;
   register: (email: string, first_name: string, last_name: string, password: string) => Promise<void>;
   updateUser: (email: string, first_name: string, last_name: string) => Promise<void>;
@@ -240,7 +240,7 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   };
 
-  // const loginMS = async (): Promise<void> => {
+  // const loginMS = async (code: string): Promise<void> => {
   //   const { accessToken } = await authApi.loginMS();
   //   const user = await authApi.me({ accessToken });
 

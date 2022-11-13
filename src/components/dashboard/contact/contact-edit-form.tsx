@@ -8,6 +8,7 @@ import * as Yup from 'yup';
 import { useFormik } from 'formik';
 import { DeleteConfirmationDialog } from '../../../components/dashboard/delete-confirmation-dialog'
 import {
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -20,6 +21,18 @@ import { MobileDatePicker } from '@mui/x-date-pickers';
 
 import { useDispatch } from '../../../store';
 import { updateContact, deleteContact } from '../../../thunks/contact';
+
+type Option = {
+  text: string;
+  value: string;
+};
+
+const types: Option[] = [
+  { text: 'Administrative', value: 'administrative' },
+  { text: 'Billing', value: 'billing' },
+  { text: 'Technical', value: 'technical' }
+];
+
 
 interface ContactEditFormProps {
     id: number;
@@ -41,7 +54,7 @@ export const ContactEditForm: FC<ContactEditFormProps> = (props) => {
 
   const formik = useFormik({
     initialValues: {
-      type: contact?.type || '',
+      type: { text: (contact?.type.charAt(0).toUpperCase() +  contact?.type.substr(1)) || '', value: contact?.type || '' },
       name: contact?.name || '',
       email: contact?.email || '',
       phone_num: contact?.phone_num || '',
@@ -54,7 +67,10 @@ export const ContactEditForm: FC<ContactEditFormProps> = (props) => {
       submit: null,
     },
     validationSchema: Yup.object({
-      type: Yup.string().max(255).required(),
+      type: Yup.object({
+        value:  Yup.string().max(255).required('Type is a required field'),
+        text:  Yup.string().max(255).required()
+      }),
       name: Yup.string().max(255).required(),
       email: Yup.string().email("Invalid email format").max(255).required(),
       phone_num: Yup.string().max(255).required(),
@@ -69,7 +85,7 @@ export const ContactEditForm: FC<ContactEditFormProps> = (props) => {
       try {
         await dispatch(updateContact({"contact" : {
           "id": id,
-          "type": values.type,
+          "type": values.type.value,
           "name": values.name,
           "email": values.email,
           "phone_num": values.phone_num,
@@ -142,15 +158,26 @@ export const ContactEditForm: FC<ContactEditFormProps> = (props) => {
               md={8}
               xs={12}
             >
-            <TextField
-              error={Boolean(formik.touched.type && formik.errors.type)}
-              fullWidth
-              helperText={formik.touched.type && formik.errors.type}
-              label="Type"
-              name="type"
-              onBlur={formik.handleBlur}
-              onChange={formik.handleChange}
+            <Autocomplete
+              getOptionLabel={(option: Option) => option.text}
+              options={types}
+              isOptionEqualToValue={(option: Option, value: Option) => option.value === value.value}
               value={formik.values.type}
+              onChange={(e, value) => {
+                formik.setFieldValue(
+                  "type",
+                  value !== null ? value : formik.initialValues.type
+                );
+              }}
+              renderInput={(params): JSX.Element => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  label="Type"
+                  helperText={formik.touched.type && formik.errors.type?.value}
+                  error={Boolean(formik.touched.type && formik.errors.type)}
+                />
+              )}
             />
             <TextField
               error={Boolean(formik.touched.name && formik.errors.name)}
