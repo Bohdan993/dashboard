@@ -11,7 +11,7 @@ import MicrosoftLogin from "react-microsoft-login";
 import { useDispatch, useSelector } from '../../store';
 import { getLoginLoading, getAuthMethod } from '../../thunks/app';
 
-const baseUrl: string = 'https://my.platops.cloud/';
+const baseUrl: string = 'https://platops.cloud/';
 
 
 export const SocialMediaLogin: FC = (props) => {
@@ -91,7 +91,7 @@ export const SocialMediaLogin: FC = (props) => {
         <MicrosoftLogin 
           clientId={'507dbab6-053a-4025-abb5-02f5df7e04cb'} 
           authCallback={login2}
-          redirectUri={`https://localhost:8001/auth/azure-callback`}
+          redirectUri={`https://my.platops.cloud/auth/azure-callback`}
           // @ts-ignore
           children={ 
           <Button
