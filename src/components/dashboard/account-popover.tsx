@@ -18,6 +18,9 @@ import { useAuth } from '../../hooks/use-auth';
 import { logout as reduxLogout } from '../../thunks/company';
 import { useDispatch, useSelector } from '../../store';
 import { UserCircle as UserCircleIcon } from '../../icons/user-circle';
+import {
+  deserializeFunction
+} from '../../utils/serialize-func';
 
 const baseUrl: string = 'https://my.platops.cloud/';
 
@@ -46,7 +49,7 @@ export const AccountPopover: FC<AccountPopoverProps> = (props) => {
             break;
           }
           case 'microsoft' : {
-            auth?.authInstance?.logout();
+            deserializeFunction(auth?.authInstance?.logout);
             break;
           }
           case 'email' : {
