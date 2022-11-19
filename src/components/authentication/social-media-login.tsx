@@ -10,9 +10,6 @@ import { useGoogleLogin } from '@react-oauth/google';
 import MicrosoftLogin from "react-microsoft-login";
 import { useDispatch, useSelector } from '../../store';
 import { getLoginLoading, getAuthMethod } from '../../thunks/app';
-import {
-  serializeFunction
-} from '../../utils/serialize-func';
 
 const baseUrl: string = 'https://my.platops.cloud/';
 
@@ -49,26 +46,23 @@ export const SocialMediaLogin: FC = (props) => {
   });
 
   const login2  = async (err: AuthError | null, data: any, msal: UserAgentApplication | undefined): Promise<void> => {
-      console.log('DATA', data);
-      console.log('MSALInstance', msal)
       try {
         dispatch(getLoginLoading({isLoginLoading: true}));
         if(err) { throw err };
-        // await loginMS(data);
+        await loginMS(data?.idToken?.rawIdToken);
         if (isMounted()) {
           dispatch(getAuthMethod({
             auth: {
               authMethod: 'microsoft',
-              authInstance: {
-                logout: serializeFunction(msal?.logout.bind(msal))
-              }
+              // authInstance: {
+              //   logout: msal?.logout.bind(msal)
+              // }
             }
           }));
-          // const returnUrl = (router.query.returnUrl as string | undefined) || '/dashboard';
-          // router.push(returnUrl).catch(console.error);
+          const returnUrl = (router.query.returnUrl as string | undefined) || '/dashboard';
+          router.push(returnUrl).catch(console.error);
         }
       } catch(err) {
-        window.sessionStorage.clear();
         dispatch(getLoginLoading({isLoginLoading: false}));
         console.error(err);
       }
@@ -94,8 +88,8 @@ export const SocialMediaLogin: FC = (props) => {
           <GoogleIcon/>
         </Button>
         <MicrosoftLogin 
-          clientId={'e9f6bb29-8d1c-4edf-b4dc-f6fad1c34b33'} 
-          authCallback={auth?.authMethod === 'microsoft' ?  () => {} : login2}
+          clientId={'10b30f22-f2b4-428b-9138-ec3eb7bc3be0'} 
+          authCallback={auth?.authMethod === 'microsoft' || isLoginLoading ?  () => {} : login2}
           redirectUri={`http://localhost:3000/redirect.html`}
           // debug={true}
           // @ts-ignore

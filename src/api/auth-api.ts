@@ -68,7 +68,7 @@ class AuthApi {
         const data: TokenData = await res.json();
 
         if (!data) {
-          reject(new Error('Логін та/або пароль введено не вірно.'));
+          reject(new Error('Please check your login/password.'));
           return;
         }
 
@@ -80,62 +80,32 @@ class AuthApi {
     });
   }
 
-  async loginMS(): LoginResponse {
+  async loginMS(code: string): LoginResponse {
 
     return new Promise(async (resolve, reject) => {
       try {        
-        const res = await fetch(`${baseUrl}/auth/login-microsoft`, {
-          method: "GET",
+        const res = await fetch(`${baseUrl}/auth/azure-callback?raw_id_token=${code}`, {
+          method: "POST",
           headers: {
             'accept': 'application/json'
-          },
+          }
         })
 
         const data: TokenData = await res.json();
 
         if (!data) {
-          reject(new Error('Please check your email and password'));
+          reject(new Error('Please check your data'));
           return;
         }
 
         resolve({ accessToken: data.access_token });
       } catch (err) {
         console.error('[Auth Api]: ', err);
-        reject(new Error('Internal server error'));
+        reject(new Error(err?.message));
       }
     });
   }
 
-  async validateTokenAndObtainSession ({ data, idToken }: {data: GoogleData; idToken: string}): LoginResponse {
-
-    return new Promise(async (resolve, reject) => {
-      try {      
-        const headers = {
-          Authorization: idToken,
-          'Content-Type': 'application/json'
-        };
-
-        const res = await fetch(`${baseUrl}/auth/login-google`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify(data)
-        })
-
-        const token: TokenData = await res.json();
-
-        if (!data) {
-          reject(new Error('Please check your email and password'));
-          return;
-        }
-
-        resolve({ accessToken: token.access_token });
-      } catch (err) {
-        console.error('[Auth Api]: ', err);
-        reject(new Error('Internal server error'));
-      }
-    });
-
-  };
 
   async loginGoogle(code: string): LoginResponse {
 
@@ -152,7 +122,7 @@ class AuthApi {
         const data: TokenData = await res.json();
 
         if (!data) {
-          reject(new Error('Please check your email and password'));
+          reject(new Error('Please check your data'));
           return;
         }
 
@@ -160,7 +130,7 @@ class AuthApi {
         
       } catch (err) {
         console.error('[Auth Api]: ', err);
-        reject(new Error('Internal server error'));
+        reject(new Error(err?.message));
       }
     });
   }
@@ -194,7 +164,7 @@ class AuthApi {
         const data: TokenData = await res.json();
 
         if (!data) {
-          reject(new Error('Заповніть всі поля правильно.'));
+          reject(new Error('Please feel all fields correctly.'));
           return;
         }
 

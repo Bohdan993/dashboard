@@ -1,8 +1,12 @@
 import type { FC } from 'react';
 import { useCallback, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import toast from 'react-hot-toast';
 import { MenuItem, Popover } from '@mui/material';
 import { useMounted } from '../../../hooks/use-mounted';
 import { useDispatch, useSelector } from '../../../store';
+import { useAuth } from '../../../hooks/use-auth';
+import { logout as reduxLogout } from '../../../thunks/company';
 import { getCompanies as getCompaniesFunc, getActiveCompany } from '../../../thunks/company';
 import type { Company } from '../../../types/company';
 
@@ -18,6 +22,8 @@ export const CompanyPopover: FC<CompanyPopoverProps> = (props) => {
   const dispatch = useDispatch();
   const { companies } = useSelector((state) => state.company);
   const isMounted = useMounted();
+  const router = useRouter();
+  const { logout } = useAuth();
 
   const handleChange = (company: Company): void => {
     dispatch(getActiveCompany(company));
@@ -27,10 +33,25 @@ export const CompanyPopover: FC<CompanyPopoverProps> = (props) => {
   const getCompanies = useCallback(async () => {
     try {
       if (isMounted()) {
-        dispatch(getCompaniesFunc());
+        await dispatch(getCompaniesFunc());
       }
     } catch (err) {
-      console.error(err);
+      if(err.name === 'UnauthorizedError') {
+        console.error(err);
+        toast.error('Unauthorized!');
+        try {
+          router.push('/').then(async () => {
+            await logout();
+            dispatch(reduxLogout());
+          }).catch(console.error);
+        } catch (err) {
+          console.error(err);
+          toast.error('Unable to logout.');
+        }
+      } else {
+        console.error(err);
+        toast.error('Something went wrong!');
+      }
     }
   }, [isMounted]);
 

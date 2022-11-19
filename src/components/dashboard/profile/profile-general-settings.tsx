@@ -39,8 +39,6 @@ export const ProfileGeneralSettings: FC<ProfileGeneralSettingsProps> = (props) =
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  console.log(user);
-
   const formik = useFormik({
     initialValues: {
       email: user?.email || '',

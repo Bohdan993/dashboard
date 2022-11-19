@@ -1,8 +1,12 @@
 import type { ChangeEvent, MouseEvent } from 'react';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
+import toast from 'react-hot-toast';
 import NextLink from 'next/link';
 import Head from 'next/head';
+import { useAuth } from '../../../hooks/use-auth';
+import { logout as reduxLogout } from '../../../thunks/company';
 import {
   Box,
   Button,
@@ -149,6 +153,8 @@ const ProjectsList: NextPage = () => {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [sort, setSort] = useState<Sort>(sortOptions[0].value);
+  const router = useRouter();
+  const { logout } = useAuth();
   const [filters, setFilters] = useState<Filters>({
     query: ''
   });
@@ -157,10 +163,25 @@ const ProjectsList: NextPage = () => {
   const getProjects = useCallback(async () => {
     try {
       if (isMounted()) {
-        dispatch(getProjectsFunc({company_id: activeCompany?.id!}));
+        await dispatch(getProjectsFunc({company_id: activeCompany?.id!}));
       }
     } catch (err) {
-      console.error(err);
+      if(err.name === 'UnauthorizedError') {
+        console.error(err);
+        toast.error('Unauthorized!');
+        try {
+          router.push('/').then(async () => {
+            await logout();
+            dispatch(reduxLogout());
+          }).catch(console.error);
+        } catch (err) {
+          console.error(err);
+          toast.error('Unable to logout.');
+        }
+      } else {
+        console.error(err);
+        toast.error('Something went wrong!');
+      }
     }
   }, [isMounted, activeCompany]);
 

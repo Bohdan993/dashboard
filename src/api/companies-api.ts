@@ -1,5 +1,5 @@
 import type { Company } from '../types/company';
-
+import {UnauthorizedError} from '../utils/unauthorized-error';
 const baseUrl:string = "https://my.platops.cloud";
 
 type GetCompaniesResponse = Promise<Company[]>;
@@ -52,8 +52,14 @@ class CompaniesApi {
                 resolve(company);
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
+
             }
         });
 
@@ -88,8 +94,13 @@ class CompaniesApi {
                 resolve(companies);
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
     }
@@ -123,8 +134,13 @@ class CompaniesApi {
                 resolve(company);
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
     }
@@ -168,8 +184,13 @@ class CompaniesApi {
                 resolve(company);
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
     }
@@ -203,8 +224,13 @@ class CompaniesApi {
                 resolve();
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
 

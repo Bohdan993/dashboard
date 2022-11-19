@@ -1,5 +1,6 @@
 import type { ChangeEvent, FC, MouseEvent } from 'react';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import NextLink from 'next/link';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
@@ -20,6 +21,8 @@ import type { Contact } from '../../../types/contact';
 import { Scrollbar } from '../../scrollbar';
 import { DeleteConfirmationDialog } from '../../../components/dashboard/delete-confirmation-dialog'
 import { useDispatch } from '../../../store';
+import { useAuth } from '../../../hooks/use-auth';
+import { logout as reduxLogout } from '../../../thunks/company';
 import { deleteContact } from '../../../thunks/contact';
 
 interface ContactListTableProps {
@@ -46,6 +49,8 @@ export const ContactListTable: FC<ContactListTableProps> = (props) => {
   const dispatch = useDispatch();
   const [show, setShow] = useState<boolean>(false);
   const [contactId, setContactId] = useState<number>(0);
+  const { logout } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     setShow(false);
@@ -67,8 +72,22 @@ export const ContactListTable: FC<ContactListTableProps> = (props) => {
       }));
       toast.success('Contact deleted!');
     } catch(err) {
-      console.error(err);
-      toast.error('Something went wrong!');
+      if(err.name === 'UnauthorizedError') {
+        console.error(err);
+        toast.error('Unauthorized!');
+        try {
+          router.push('/').then(async () => {
+            await logout();
+            dispatch(reduxLogout());
+          }).catch(console.error);
+        } catch (err) {
+          console.error(err);
+          toast.error('Unable to logout.');
+        }
+      } else {
+        console.error(err);
+        toast.error('Something went wrong!');
+      }
     }
   }
 

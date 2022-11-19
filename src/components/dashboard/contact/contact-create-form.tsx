@@ -15,6 +15,8 @@ import {
   Autocomplete,
 } from '@mui/material';
 import { useDispatch } from '../../../store';
+import { useAuth } from '../../../hooks/use-auth';
+import { logout as reduxLogout } from '../../../thunks/company';
 import { createContact } from '../../../thunks/contact';
 
 type Option = {
@@ -36,6 +38,7 @@ export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
   const {company_id, ...rest} = props;
   const dispatch = useDispatch();
   const router = useRouter();
+  const { logout } = useAuth();
   const formik = useFormik({
     initialValues: {
       type: { text: '', value: '' },
@@ -84,8 +87,22 @@ export const ContactCreateForm: FC<ContactCreateFormProps> = (props) => {
         router.push('/dashboard/contacts').catch(console.error);
         
       } catch (err) {
-        console.error(err);
-        toast.error('Something went wrong!');
+        if(err.name === 'UnauthorizedError') {
+          console.error(err);
+          toast.error('Unauthorized!');
+          try {
+            router.push('/').then(async () => {
+              await logout();
+              dispatch(reduxLogout());
+            }).catch(console.error);
+          } catch (err) {
+            console.error(err);
+            toast.error('Unable to logout.');
+          }
+        } else {
+          console.error(err);
+          toast.error('Something went wrong!');
+        }
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.message });
         helpers.setSubmitting(false);

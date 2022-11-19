@@ -1,4 +1,5 @@
 import type { Project } from '../types/project';
+import {UnauthorizedError} from '../utils/unauthorized-error';
 
 const baseUrl:string = "https://my.platops.cloud";
 
@@ -54,8 +55,13 @@ class ProjectsApi {
                 resolve(project);
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
 
@@ -90,8 +96,13 @@ class ProjectsApi {
                 resolve(projects);
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
     }
@@ -125,8 +136,13 @@ class ProjectsApi {
                 resolve(project);
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
     }
@@ -168,8 +184,13 @@ class ProjectsApi {
                 resolve(project);
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
     }
@@ -203,8 +224,13 @@ class ProjectsApi {
                 resolve();
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
 

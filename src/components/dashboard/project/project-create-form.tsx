@@ -15,6 +15,8 @@ import {
   Typography
 } from '@mui/material';
 import { useDispatch } from '../../../store';
+import { useAuth } from '../../../hooks/use-auth';
+import { logout as reduxLogout } from '../../../thunks/company';
 import { createProject } from '../../../thunks/project';
 import { MobileDatePicker } from '@mui/x-date-pickers';
 
@@ -27,6 +29,7 @@ export const ProjectCreateForm: FC<ProjectCreateFormProps> = (props) => {
   const dispatch = useDispatch();
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(new Date());
+  const { logout } = useAuth();
   const router = useRouter();
   const formik = useFormik({
     initialValues: {
@@ -58,8 +61,22 @@ export const ProjectCreateForm: FC<ProjectCreateFormProps> = (props) => {
         router.push('/dashboard/projects').catch(console.error);
         
       } catch (err) {
-        console.error(err);
-        toast.error('Something went wrong!');
+        if(err.name === 'UnauthorizedError') {
+          console.error(err);
+          toast.error('Unauthorized!');
+          try {
+            router.push('/').then(async () => {
+              await logout();
+              dispatch(reduxLogout());
+            }).catch(console.error);
+          } catch (err) {
+            console.error(err);
+            toast.error('Unable to logout.');
+          }
+        } else {
+          console.error(err);
+          toast.error('Something went wrong!');
+        }
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.message });
         helpers.setSubmitting(false);

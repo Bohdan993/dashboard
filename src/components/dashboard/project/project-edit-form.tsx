@@ -19,6 +19,8 @@ import {
 import { MobileDatePicker } from '@mui/x-date-pickers';
 
 import { useDispatch } from '../../../store';
+import { useAuth } from '../../../hooks/use-auth';
+import { logout as reduxLogout } from '../../../thunks/company';
 import { updateProject, deleteProject } from '../../../thunks/project';
 
 interface ProjectEditFormProps {
@@ -31,6 +33,7 @@ interface ProjectEditFormProps {
 export const ProjectEditForm: FC<ProjectEditFormProps> = (props) => {
   const {id, company_id, project, ...rest} = props;
   const [show, setShow] = useState<boolean>(false);
+  const { logout } = useAuth();
   const router = useRouter();
   const dispatch = useDispatch();
   const [startDate, setStartDate] = useState<Date | null>(new Date(project?.start_date));
@@ -74,8 +77,22 @@ export const ProjectEditForm: FC<ProjectEditFormProps> = (props) => {
         toast.success('Project updated!');
         router.push('/dashboard/projects').catch(console.error);
       } catch (err) {
-        console.error(err);
-        toast.error('Something went wrong!');
+        if(err.name === 'UnauthorizedError') {
+          console.error(err);
+          toast.error('Unauthorized!');
+          try {
+            router.push('/').then(async () => {
+              await logout();
+              dispatch(reduxLogout());
+            }).catch(console.error);
+          } catch (err) {
+            console.error(err);
+            toast.error('Unable to logout.');
+          }
+        } else {
+          console.error(err);
+          toast.error('Something went wrong!');
+        }
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.message });
         helpers.setSubmitting(false);
@@ -98,8 +115,22 @@ export const ProjectEditForm: FC<ProjectEditFormProps> = (props) => {
       toast.success('Project deleted!');
       router.push('/dashboard/projects').catch(console.error);
     } catch(err) {
-      console.error(err);
-      toast.error('Something went wrong!');
+      if(err.name === 'UnauthorizedError') {
+        console.error(err);
+        toast.error('Unauthorized!');
+        try {
+          router.push('/').then(async () => {
+            await logout();
+            dispatch(reduxLogout());
+          }).catch(console.error);
+        } catch (err) {
+          console.error(err);
+          toast.error('Unable to logout.');
+        }
+      } else {
+        console.error(err);
+        toast.error('Something went wrong!');
+      }
     }
   }
 

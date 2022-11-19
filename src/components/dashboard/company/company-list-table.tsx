@@ -1,5 +1,6 @@
 import type { ChangeEvent, FC, MouseEvent } from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/router';
 import NextLink from 'next/link';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
@@ -21,6 +22,8 @@ import { Scrollbar } from '../../scrollbar';
 import { DeleteConfirmationDialog } from '../../../components/dashboard/delete-confirmation-dialog'
 import { useDispatch } from '../../../store';
 import { deleteCompany } from '../../../thunks/company';
+import { useAuth } from '../../../hooks/use-auth';
+import { logout as reduxLogout } from '../../../thunks/company';
 
 interface CompanyListTableProps {
   companies: Company[];
@@ -42,6 +45,8 @@ export const CompanyListTable: FC<CompanyListTableProps> = (props) => {
     ...other
   } = props;
   const dispatch = useDispatch();
+  const { logout } = useAuth();
+  const router = useRouter();
   const [show, setShow] = useState<boolean>(false);
   const [companyId, setCompanyId] = useState<number>(0);
 
@@ -61,8 +66,22 @@ export const CompanyListTable: FC<CompanyListTableProps> = (props) => {
       // setLocalCompanies(newLocalCompanies);
       toast.success('Company deleted!');
     } catch(err) {
-      console.error(err);
-      toast.error('Something went wrong!');
+      if(err.name === 'UnauthorizedError') {
+        console.error(err);
+        toast.error('Unauthorized!');
+        try {
+          router.push('/').then(async () => {
+            await logout();
+            dispatch(reduxLogout());
+          }).catch(console.error);
+        } catch (err) {
+          console.error(err);
+          toast.error('Unable to logout.');
+        }
+      } else {
+        console.error(err);
+        toast.error('Something went wrong!');
+      }
     }
   }
 
@@ -71,45 +90,10 @@ export const CompanyListTable: FC<CompanyListTableProps> = (props) => {
 
   return (
     <div {...other}>
-      {/* <Box
-        sx={{
-          backgroundColor: (theme) => theme.palette.mode === 'dark'
-            ? 'neutral.800'
-            : 'neutral.100',
-          display: enableBulkActions ? 'block' : 'none',
-          px: 2,
-          py: 0.5
-        }}
-      >
-        <Checkbox
-          checked={selectedAllCompanies}
-          indeterminate={selectedSomeCompanies}
-          onChange={handleSelectAllCompanies}
-        />
-        <Button
-          size="small"
-          sx={{ ml: 2 }}
-        >
-          Delete
-        </Button>
-        <Button
-          size="small"
-          sx={{ ml: 2 }}
-        >
-          Edit
-        </Button>
-      </Box> */}
       <Scrollbar>
         <Table sx={{ minWidth: 700 }}>
           <TableHead sx={{ visibility: 'visible' }}>
             <TableRow>
-              {/* <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedAllCompanies}
-                  indeterminate={selectedSomeCompanies}
-                  onChange={handleSelectAllCompanies}
-                />
-              </TableCell> */}
               <TableCell>
                 Company Name
               </TableCell>

@@ -1,13 +1,15 @@
 import type { FC, MouseEvent } from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { companiesApi } from '../../../api/companies-api';
 import NextLink from 'next/link';
 import type { Company } from '../../../types/company';
 import toast from 'react-hot-toast';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
-import { DeleteConfirmationDialog } from '../../../components/dashboard/delete-confirmation-dialog'
+import { DeleteConfirmationDialog } from '../../../components/dashboard/delete-confirmation-dialog';
+import { useAuth } from '../../../hooks/use-auth';
+import { logout as reduxLogout } from '../../../thunks/company';
+import { useDispatch } from '../../../store';
 import {
   Box,
   Button,
@@ -18,7 +20,6 @@ import {
   Typography
 } from '@mui/material';
 
-import { useDispatch } from '../../../store';
 import { updateCompany, deleteCompany } from '../../../thunks/company';
 
 interface CompanyEditFormProps {
@@ -31,6 +32,7 @@ export const CompanyEditForm: FC<CompanyEditFormProps> = (props) => {
   const {id, company, ...rest} = props;
   const [show, setShow] = useState<boolean>(false);
   const router = useRouter();
+  const { logout } = useAuth();
   const dispatch = useDispatch();
     
 
@@ -69,8 +71,22 @@ export const CompanyEditForm: FC<CompanyEditFormProps> = (props) => {
         toast.success('Company updated!');
         router.push('/dashboard/companies').catch(console.error);
       } catch (err) {
-        console.error(err);
-        toast.error('Something went wrong!');
+        if(err.name === 'UnauthorizedError') {
+          console.error(err);
+          toast.error('Unauthorized!');
+          try {
+            router.push('/').then(async () => {
+              await logout();
+              dispatch(reduxLogout());
+            }).catch(console.error);
+          } catch (err) {
+            console.error(err);
+            toast.error('Unable to logout.');
+          }
+        } else {
+          console.error(err);
+          toast.error('Something went wrong!');
+        }
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.message });
         helpers.setSubmitting(false);
@@ -92,8 +108,22 @@ export const CompanyEditForm: FC<CompanyEditFormProps> = (props) => {
       toast.success('Company deleted!');
       router.push('/dashboard/companies').catch(console.error);
     } catch(err) {
-      console.error(err);
-      toast.error('Something went wrong!');
+      if(err.name === 'UnauthorizedError') {
+        console.error(err);
+        toast.error('Unauthorized!');
+        try {
+          router.push('/').then(async () => {
+            await logout();
+            dispatch(reduxLogout());
+          }).catch(console.error);
+        } catch (err) {
+          console.error(err);
+          toast.error('Unable to logout.');
+        }
+      } else {
+        console.error(err);
+        toast.error('Something went wrong!');
+      }
     }
   }
 

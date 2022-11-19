@@ -15,11 +15,14 @@ import {
 } from '@mui/material';
 import { useDispatch } from '../../../store';
 import { createCompany } from '../../../thunks/company';
+import { useAuth } from '../../../hooks/use-auth';
+import { logout as reduxLogout } from '../../../thunks/company';
 
 
 export const CompanyCreateForm: FC = (props) => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { logout } = useAuth();
   const formik = useFormik({
     initialValues: {
       company_name: '',
@@ -55,8 +58,22 @@ export const CompanyCreateForm: FC = (props) => {
         router.push('/dashboard/companies').catch(console.error);
         
       } catch (err) {
-        console.error(err);
-        toast.error('Something went wrong!');
+        if(err.name === 'UnauthorizedError') {
+          console.error(err);
+          toast.error('Unauthorized!');
+          try {
+            router.push('/').then(async () => {
+              await logout();
+              dispatch(reduxLogout());
+            }).catch(console.error);
+          } catch (err) {
+            console.error(err);
+            toast.error('Unable to logout.');
+          }
+        } else {
+          console.error(err);
+          toast.error('Something went wrong!');
+        }
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.message });
         helpers.setSubmitting(false);

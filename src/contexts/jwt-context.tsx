@@ -15,7 +15,7 @@ export interface AuthContextValue extends State {
   platform: 'JWT';
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  // loginMS: (response: any) => Promise<void>;
+  loginMS: (response: any) => Promise<void>;
   loginGoogle: (response: any) => Promise<void>;
   register: (email: string, first_name: string, last_name: string, password: string) => Promise<void>;
   updateUser: (email: string, first_name: string, last_name: string) => Promise<void>;
@@ -170,7 +170,7 @@ export const AuthContext = createContext<AuthContextValue>({
   ...initialState,
   platform: 'JWT',
   login: () => Promise.resolve(),
-  // loginMS: () => Promise.resolve(),
+  loginMS: () => Promise.resolve(),
   loginGoogle: () => Promise.resolve(),
   logout: () => Promise.resolve(),
   register: () => Promise.resolve(),
@@ -224,7 +224,6 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   const login = async (email: string, password: string): Promise<void> => {
 
-
       const { accessToken } = await authApi.login({ email, password });
       const user = await authApi.me({ accessToken });
   
@@ -240,19 +239,20 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   };
 
-  // const loginMS = async (code: string): Promise<void> => {
-  //   const { accessToken } = await authApi.loginMS();
-  //   const user = await authApi.me({ accessToken });
+  const loginMS = async (code: string): Promise<void> => {
+    
+    const { accessToken } = await authApi.loginMS(code);
+    const user = await authApi.me({ accessToken });
 
-  //   localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('accessToken', accessToken);
 
-  //   dispatch({
-  //     type: ActionType.LOGIN,
-  //     payload: {
-  //       user
-  //     }
-  //   });
-  // };
+    dispatch({
+      type: ActionType.LOGIN,
+      payload: {
+        user
+      }
+    });
+  };
 
   const loginGoogle = async (code: string): Promise<void> => {
 
@@ -271,6 +271,7 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
   const logout = async (): Promise<void> => {
     localStorage.removeItem('accessToken');
+    sessionStorage.clear();
     dispatch({ type: ActionType.LOGOUT });
   };
 
@@ -342,7 +343,7 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
         login,
         logout,
         register,
-        // loginMS,
+        loginMS,
         loginGoogle,
         updateUser,
         updateUserAvatar,

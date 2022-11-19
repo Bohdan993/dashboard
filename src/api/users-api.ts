@@ -1,4 +1,5 @@
 import type { User } from '../types/user';
+import {UnauthorizedError} from '../utils/unauthorized-error';
 
 const baseUrl:string = "https://my.platops.cloud";
 
@@ -13,8 +14,6 @@ type UpdateUserRequest = {
 type UpdateUserAvatarRequest = {
     avatar: string;
 };
-
-type GetUserRequest = {};
 
 class UsersApi {
 
@@ -53,8 +52,13 @@ class UsersApi {
                 resolve(user);
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
     }
@@ -91,8 +95,13 @@ class UsersApi {
                 resolve(user);
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
     }
@@ -126,8 +135,13 @@ class UsersApi {
                 resolve();
 
             } catch (err) {
-                console.error('[Auth Api]: ', err);
-                reject(new Error('Internal server error'));
+                if(err.message === "403") {
+                    console.error('[Invalid token or expired token]: ', err);
+                    reject(new UnauthorizedError(err.message));
+                } else {
+                    console.error('[Auth Api]: ', err);
+                    reject(new Error('Internal server error'));
+                }
             }
         });
 
